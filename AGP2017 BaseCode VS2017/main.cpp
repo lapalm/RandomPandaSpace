@@ -328,7 +328,7 @@ void init(void) {
 	uniformIndex = glGetUniformLocation(reflectrefractShaderProgram, "texture1_skycube");
 	glUniform1i(uniformIndex, 1);
 
-	// Advanced Lighting Shader (w/Gamma Correction)
+	// HSV ShaderProgram (w/Gamma Correction <--- To be added soon!)
 
 	HSVShaderProgram = rt3d::initShaders("HSVVert.shader", "HSVFrag.shader");
 
