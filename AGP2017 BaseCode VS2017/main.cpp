@@ -65,7 +65,7 @@ glm::vec3 up(0.0f, 1.0f, 0.0f);
 stack<glm::mat4> mvStack;
 
 // TEXTURE STUFF
-GLuint textures[3];
+GLuint textures[7];
 GLuint skybox[5];
 GLuint labels[5];
 
@@ -339,7 +339,7 @@ void init(void) {
 
 	GLint objectColorLoc = glGetUniformLocation(HSVShaderProgram, "objectColor");
 	GLint lightColorLoc = glGetUniformLocation(HSVShaderProgram, "lightColor");
-	GLint lightPosLoc = glGetUniformLocation(HSVShaderProgram, "lightPos"); // Depreciated Code soon. May need deleting
+	GLint lightPosLoc = glGetUniformLocation(HSVShaderProgram, "lightPos"); 
 	GLint lightPositionLoc = glGetUniformLocation(HSVShaderProgram, "light.position");
 	GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
 	GLint matAmbientLoc = glGetUniformLocation(HSVShaderProgram, "material.ambient");
@@ -416,7 +416,7 @@ void init(void) {
 	glUniform3f(ourImageLoc, 1.0f, 1.0f, 0.0f);
 	glUniform1f(hueShiftLoc, hueShift);
 	glUniform1f(satBoostLoc, 1.0f);
-	hueShift += 0.00005f;
+	
 
 	// Set Spotlight Properties
 
@@ -435,8 +435,11 @@ void init(void) {
 	glUniform1f(linearPointLightLoc, 0.045f);
 	glUniform1f(quadraticPointLightLoc, 0.0075f);
 
+
 	textureProgram = rt3d::initShaders("textured.vert", "textured.frag");
 	skyboxProgram = rt3d::initShaders("cubeMap.vert", "cubeMap.frag");
+	HSVShaderProgram = rt3d::initShaders("HSVVert.shader", "HSVFrag.shader");
+
 
 	const char *cubeTexFiles[6] = {
 		"cloudy-skybox/back.bmp", 
@@ -455,14 +458,12 @@ void init(void) {
 	vector<GLuint> indices;
 	rt3d::loadObj("cube.obj", verts, norms, tex_coords, indices);
 	meshIndexCount = indices.size();
-	textures[0] = loadBitmap("concrete.bmp");
+	
 	meshObjects[0] = rt3d::createMesh(verts.size() / 3, verts.data(), nullptr, norms.data(), tex_coords.data(), meshIndexCount, indices.data());
 
-	textures[1] = loadBitmap("hobgoblin2.bmp");
+	
 	meshObjects[1] = tmpModel.ReadMD2Model("tris.MD2");
 	md2VertCount = tmpModel.getVertDataCount();
-
-	textures[2] = loadBitmap("studdedmetal.bmp");
 
 
 	verts.clear(); norms.clear(); tex_coords.clear(); indices.clear();
@@ -479,6 +480,21 @@ void init(void) {
 	rt3d::loadObj("ground2.obj", verts, norms, tex_coords, indices);
 	groundIndexCount = indices.size();
 	meshObjects[4] = rt3d::createMesh(verts.size() / 3, verts.data(), nullptr, norms.data(), tex_coords.data(), groundIndexCount, indices.data());
+
+	// Textures:
+	textures[0] = loadBitmap("concrete.bmp");
+	textures[1] = loadBitmap("hobgoblin2.bmp");
+	textures[2] = loadBitmap("studdedmetal.bmp");
+	textures[3] = loadBitmap("lavaTexture.bmp");
+	textures[4] = loadBitmap("container2.bmp");
+	textures[5] = loadBitmap("container2_specular.bmp");
+
+	unsigned int diffuseMap = textures[4];
+	unsigned int specularMap = textures[5];
+	unsigned int emissionMap = textures[3];
+	
+
+
 	///////////////////
 	// Initialise FBO
 	///////////////////
@@ -681,7 +697,7 @@ void draw(SDL_Window * window) {
 		glUseProgram(shaderProgram);
 		rt3d::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));
 		rt3d::setLightPos(shaderProgram, glm::value_ptr(tmp));
-		glBindTexture(GL_TEXTURE_2D, textures[2]); // studded steel texture
+
 		mvStack.push(mvStack.top());
 
 		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(lightPos[0], lightPos[1], lightPos[2]));
@@ -749,6 +765,21 @@ void draw(SDL_Window * window) {
 		rt3d::drawIndexedMesh(meshObjects[2], toonIndexCount, GL_TRIANGLES);
 		mvStack.pop();
 
+		// draw the HSV bunny
+		glUseProgram(HSVShaderProgram);
+		rt3d::setUniformMatrix4fv(HSVShaderProgram, "projection", glm::value_ptr(projection));
+		mvStack.push(mvStack.top());
+		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(3.0f, 0.0f, -2.0f));
+		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(10.0f, 10.0f, 10.0f));
+		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
+		hueShift += 0.00005f;
+		/*rt3d::setLight(HSVShaderProgram, light0);
+		rt3d::setLightPos(HSVShaderProgram, glm::value_ptr(tmp));*/
+
+		rt3d::setUniformMatrix3fv(HSVShaderProgram, "normalmatrix", glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(mvStack.top())))));
+		rt3d::drawIndexedMesh(meshObjects[2], toonIndexCount, GL_TRIANGLES);
+		mvStack.pop();
+
 
 		// draw the statue with mixed reflection and refraction
 		glUseProgram(reflectrefractShaderProgram);
@@ -778,12 +809,16 @@ void draw(SDL_Window * window) {
 		glUseProgram(envmapProgram);
 		rt3d::setLightPos(envmapProgram, glm::value_ptr(tmp));
 		rt3d::setUniformMatrix4fv(envmapProgram, "projection", glm::value_ptr(projection));
+
 		// Now bind textures to texture units
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skybox[0]);
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textures[2]); // studded metal
 
+		
+		
 		glm::mat4 modelMatrix(1.0);
 		mvStack.push(mvStack.top());
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(5.0f, 2.5f, -1.0f));
@@ -798,6 +833,9 @@ void draw(SDL_Window * window) {
 		rt3d::setMaterial(envmapProgram, material1);
 		rt3d::drawIndexedMesh(meshObjects[0], meshIndexCount, GL_TRIANGLES);
 		mvStack.pop();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[3]); // lavaTexture
 		
 		// remember to use at least one pop operation per push...
 		mvStack.pop(); // initial matrix
