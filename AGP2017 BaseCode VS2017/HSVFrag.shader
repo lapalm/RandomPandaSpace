@@ -43,12 +43,13 @@ struct SpotLight {
 };
 
 
-in vec3 FragPos;
-in vec3 Normal;
-in vec2 in_UV;
+in vec3 FragPos; // VertexPosition
+in vec3 Normal; // WorldNormals <-- Normalized in vertex shader
+in vec2 in_UV; // ex_TexCoords
 
-out vec4 color;
+layout(location = 0) = out vec4 out_color; //The result to be outputted
 
+// Put uniforms here:
 uniform vec3 viewPos;
 uniform DirLight dirLight;
 uniform PointLight pointLight;
@@ -102,17 +103,17 @@ void main() {
 
 	// Each light type adds it's contribution to the resulting output color until all light sources are processed.
 	// The resulting color contains the color impact of all the light sources in the scene combined. 
-	color = vec4(result, 1.0f);
+	out_color = vec4(result, 1.0f);
 }
 
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 
 	vec3 lightDir = normalize(-light.direction); // Normalize the resulting direction vector
 
-												 // Diffuse
+	// Diffuse
 	float diff = max(dot(normal, lightDir), 0.0); // Use Max to avoid dot product going negative when vector is greater than 90 degrees.
 
-												  // Specular 
+	// Specular 
 	vec3 reflectDir = reflect(-lightDir, normal);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
@@ -129,10 +130,10 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 
 	vec3 lightDir = normalize(light.position - fragPos); // Normalize the resulting direction vector
 
-														 // Diffuse
+	// Diffuse
 	float diff = max(dot(normal, lightDir), 0.0); // Use Max to avoid dot product going negative when vector is greater than 90 degrees.
 
-												  // Specular 
+	// Specular 
 	vec3 reflectDir = reflect(-lightDir, normal);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
@@ -156,10 +157,10 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 
 	vec3 lightDir = normalize(light.position - fragPos); // Normalize the resulting direction vector
 
-														 // Diffuse
+	// Diffuse
 	float diff = max(dot(normal, lightDir), 0.0); // Use Max to avoid dot product going negative when vector is greater than 90 degrees.
 
-												  // Specular
+	// Specular
 	vec3 reflectDir = reflect(-lightDir, normal);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 

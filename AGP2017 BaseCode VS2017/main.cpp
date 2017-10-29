@@ -38,6 +38,7 @@ GLuint skyboxProgram;
 GLuint toonShaderProgram;
 GLuint envmapProgram;
 GLuint reflectrefractShaderProgram;
+GLuint HSVShaderProgram;
 
 
 //////////////////
@@ -329,6 +330,107 @@ void init(void) {
 
 	// Advanced Lighting Shader (w/Gamma Correction)
 
+	HSVShaderProgram = rt3d::initShaders("HSVVert.shader", "HSVFrag.shader");
+
+	// Don't forget to 'use' the corresponding shader program first (to set the uniform)
+
+	GLint objectColorLoc = glGetUniformLocation(HSVShaderProgram, "objectColor");
+	GLint lightColorLoc = glGetUniformLocation(HSVShaderProgram, "lightColor");
+	GLint lightPosLoc = glGetUniformLocation(HSVShaderProgram, "lightPos"); // Depreciated Code soon. May need deleting
+	GLint lightPositionLoc = glGetUniformLocation(HSVShaderProgram, "light.position");
+	GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
+	GLint matAmbientLoc = glGetUniformLocation(HSVShaderProgram, "material.ambient");
+	GLint matDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
+	GLint matSpecularLoc = glGetUniformLocation(HSVShaderProgram, "material.specular");
+	GLint matShineLoc = glGetUniformLocation(HSVShaderProgram, "material.shininess");
+	GLint lightAmbientLoc = glGetUniformLocation(HSVShaderProgram, "light.ambient");
+	GLint lightDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "light.diffuse");
+	GLint lightSpecularLoc = glGetUniformLocation(HSVShaderProgram, "light.specular");
+	GLint lightDirPos = glGetUniformLocation(HSVShaderProgram, "light.direction");
+	GLint lightConstantPos = glGetUniformLocation(HSVShaderProgram, "light.constant");
+	GLint lightLinearPos = glGetUniformLocation(HSVShaderProgram, "light.linear");
+	GLint lightQuadraticPos = glGetUniformLocation(HSVShaderProgram, "light.quadratic");
+	GLint ourImageLoc = glGetUniformLocation(HSVShaderProgram, "ourImage");
+	GLint hueShiftLoc = glGetUniformLocation(HSVShaderProgram, "hueShift");
+	GLint satBoostLoc = glGetUniformLocation(HSVShaderProgram, "satBoost");
+	GLint lightSpotLoc = glGetUniformLocation(HSVShaderProgram, "light.spotPosition");
+	GLint lightSpotdirLoc = glGetUniformLocation(HSVShaderProgram, "light.spotDirection");
+	GLint lightSpotCutOffLoc = glGetUniformLocation(HSVShaderProgram, "light.cutOff");
+	GLint lightSpotOuterCutOffLoc = glGetUniformLocation(HSVShaderProgram, "light.outerCutOff");
+
+	// Multi-light - dirLight
+	GLint dirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.direction");
+	GLint ambientDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.ambient");
+	GLint diffuseDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.diffuse");
+	GLint specularDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.specular");
+
+	// Multi-light - pointLight
+	GLint pointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.direction");
+	GLint ambientPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.ambient");
+	GLint diffusePointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.diffuse");
+	GLint specularPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.specular");
+	GLint constantPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.constant");
+	GLint linearPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.linear");
+	GLint quadraticPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.quadratic");
+
+	// Multi-light - spotLight
+	GLint spotLightPositionLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.position");
+	GLint spotLightDirectionLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.direction");
+	GLint ambientSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.ambient");
+	GLint diffuseSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.diffuse");
+	GLint specularSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.specular");
+	GLint constantSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.constant");
+	GLint linearSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.linear");
+	GLint quadraticSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.quadratic");
+	GLint cutOffSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.cutOff");
+	GLint outerCutOffSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.outerCutOff");
+
+	//glUniform3f(objectColorLoc, color.x, color.y, color.z);
+	glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f); // Also set light's color (white)
+	glUniform3f(lightPosLoc, lampPos.getPosition().x, lampPos.getPosition().y, lampPos.getPosition().z);
+	glUniform3f(viewPosLoc, camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
+
+	// Set Material Properties
+	glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
+	glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
+	glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
+	glUniform1f(matShineLoc, 32.0f);
+
+	// Set Light Properties
+	glUniform3f(lightAmbientLoc, 0.2f, 0.2f, 0.2f);
+	glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f); // Darken the light a bit to fit the scene
+	glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
+	glUniform3f(lightDirPos, lampPos.getPosition().x, lampPos.getPosition().y, lampPos.getPosition().z);
+	glUniform3f(lightPositionLoc, lampPos.getPosition().x, lampPos.getPosition().y, lampPos.getPosition().z);
+
+	// Set Light attenuation properties <- See for value reference: http://www.ogre3d.org/tikiwiki/tiki-index.php?page=-Point+Light+Attenuation
+	// These values are for attenuation distance: 50
+	//glUniform1f(lightConstantPos, 1.0f); 
+	//glUniform1f(lightLinearPos, 0.022f);
+	//glUniform1f(lightQuadraticPos, 0.0019f);
+
+	// Set HSV Properties
+	glUniform3f(ourImageLoc, 1.0f, 1.0f, 0.0f);
+	glUniform1f(hueShiftLoc, hueshift);
+	glUniform1f(satBoostLoc, 1.0f);
+	hueshift += 0.00005f;
+
+	// Set Spotlight Properties
+
+	// Set Directional Light Properties for multi-light
+	glUniform3f(dirLightLoc, sunPos.getPosition().x, sunPos.getPosition().y, sunPos.getPosition().z);
+	glUniform3f(ambientDirLightLoc, 0.05f, 0.05f, 0.05f);
+	glUniform3f(diffuseDirLightLoc, 0.05f, 0.05f, 0.05f); // Darken the light a bit to fit the scene
+	glUniform3f(specularDirLightLoc, 0.1f, 0.1f, 0.1f);
+
+	// Set Point Light Properties for multi-light
+	glUniform3f(pointLightLoc, lampPos.getPosition().x, lampPos.getPosition().y, lampPos.getPosition().z);
+	glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
+	glUniform3f(diffusePointLightLoc, 0.1f, 0.1f, 0.1f);
+	glUniform3f(specularPointLightLoc, 0.5f, 0.5f, 0.5f);
+	glUniform1f(constantPointLightLoc, 1.0f);
+	glUniform1f(linearPointLightLoc, 0.045f);
+	glUniform1f(quadraticPointLightLoc, 0.0075f);
 
 	textureProgram = rt3d::initShaders("textured.vert", "textured.frag");
 	skyboxProgram = rt3d::initShaders("cubeMap.vert", "cubeMap.frag");
