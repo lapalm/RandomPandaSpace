@@ -1,7 +1,7 @@
 #version 330 core
-layout(location = 0) in vec3 position;
-layout(location = 2) in vec2 uv;
-layout(location = 3) in vec3 normal;
+layout(location = 0) in vec3 position; // VERTEX in rt3d.h
+layout(location = 2) in vec3 normal; // NORMAL in rt3d.h
+layout(location = 3) in vec2 uv; // TEXCOORD in rt3d.h
 
 out vec3 FragPos;
 out vec3 Normal;
