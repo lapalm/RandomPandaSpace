@@ -20,6 +20,7 @@ out float ex_D;
 
 // multiply each vertex position by the MVP matrix
 // and find V, L, N vectors for the fragment shader
+
 void main(void) {
 
 	// vertex into eye coordinates

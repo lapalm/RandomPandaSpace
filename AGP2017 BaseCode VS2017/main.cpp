@@ -75,7 +75,10 @@ rt3d::lightStruct light0 = {
 	{1.0f, 1.0f, 1.0f, 1.0f}, // specular
 	{-5.0f, 2.0f, 2.0f, 1.0f}  // position
 };
+
 glm::vec4 lightPos(-5.0f, 2.0f, 2.0f, 1.0f); //light position
+float hueShift = 0.0f; // HSV hue shift
+glm::vec3 sunPos(0.0f, 100.0f, 0.0f); // Position of the sun
 
 rt3d::materialStruct material0 = {
 	{0.4f, 0.4f, 0.4f, 1.0f}, // ambient
@@ -388,7 +391,7 @@ void init(void) {
 	//glUniform3f(objectColorLoc, color.x, color.y, color.z);
 	glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f); // Also set light's color (white)
 	glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-	glUniform3f(viewPosLoc, camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
+	//glUniform3f(viewPosLoc, camera->getPosition().x, camera->getPosition().y, camera->getPosition().z); <--- Check
 
 	// Set Material Properties
 	glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
@@ -411,20 +414,20 @@ void init(void) {
 
 	// Set HSV Properties
 	glUniform3f(ourImageLoc, 1.0f, 1.0f, 0.0f);
-	glUniform1f(hueShiftLoc, hueshift);
+	glUniform1f(hueShiftLoc, hueShift);
 	glUniform1f(satBoostLoc, 1.0f);
-	hueshift += 0.00005f;
+	hueShift += 0.00005f;
 
 	// Set Spotlight Properties
 
 	// Set Directional Light Properties for multi-light
-	glUniform3f(dirLightLoc, sunPos.getPosition().x, sunPos.getPosition().y, sunPos.getPosition().z);
+	glUniform3f(dirLightLoc, sunPos.x, sunPos.y, sunPos.z);
 	glUniform3f(ambientDirLightLoc, 0.05f, 0.05f, 0.05f);
 	glUniform3f(diffuseDirLightLoc, 0.05f, 0.05f, 0.05f); // Darken the light a bit to fit the scene
 	glUniform3f(specularDirLightLoc, 0.1f, 0.1f, 0.1f);
 
 	// Set Point Light Properties for multi-light
-	glUniform3f(pointLightLoc, lampPos.getPosition().x, lampPos.getPosition().y, lampPos.getPosition().z);
+	glUniform3f(pointLightLoc, lightPos.x, lightPos.y, lightPos.z);
 	glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
 	glUniform3f(diffusePointLightLoc, 0.1f, 0.1f, 0.1f);
 	glUniform3f(specularPointLightLoc, 0.5f, 0.5f, 0.5f);
