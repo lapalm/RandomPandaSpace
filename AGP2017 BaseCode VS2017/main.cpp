@@ -353,9 +353,8 @@ void init(void) {
 	GLint lightConstantPos = glGetUniformLocation(HSVShaderProgram, "light.constant");
 	GLint lightLinearPos = glGetUniformLocation(HSVShaderProgram, "light.linear");
 	GLint lightQuadraticPos = glGetUniformLocation(HSVShaderProgram, "light.quadratic");
-	GLint ourImageLoc = glGetUniformLocation(HSVShaderProgram, "ourImage");
-	GLint hueShiftLoc = glGetUniformLocation(HSVShaderProgram, "hueShift");
-	GLint satBoostLoc = glGetUniformLocation(HSVShaderProgram, "satBoost");
+	
+	
 	GLint lightSpotLoc = glGetUniformLocation(HSVShaderProgram, "light.spotPosition");
 	GLint lightSpotdirLoc = glGetUniformLocation(HSVShaderProgram, "light.spotDirection");
 	GLint lightSpotCutOffLoc = glGetUniformLocation(HSVShaderProgram, "light.cutOff");
@@ -408,19 +407,20 @@ void init(void) {
 	//glUniform1f(lightLinearPos, 0.022f);
 	//glUniform1f(lightQuadraticPos, 0.0019f);
 
-	// Set HSV Properties
-	glUniform3f(ourImageLoc, 1.0f, 1.0f, 0.0f);
-	glUniform1f(hueShiftLoc, hueShift);
-	glUniform1f(satBoostLoc, 1.0f);
+	
 	
 
 	// Set Spotlight Properties
 
 	// Set Directional Light Properties for multi-light
-	glUniform3f(dirLightLoc, sunPos.x, sunPos.y, sunPos.z);
+	//glUniform3f(dirLightLoc, sunPos.x, sunPos.y, sunPos.z); <---- Fix back to sun after debug from lightPos.
+	glUniform3f(dirLightLoc, lightPos.x, lightPos.y, lightPos.z);
+
 	glUniform3f(ambientDirLightLoc, 0.05f, 0.05f, 0.05f);
 	glUniform3f(diffuseDirLightLoc, 0.05f, 0.05f, 0.05f); // Darken the light a bit to fit the scene
 	glUniform3f(specularDirLightLoc, 0.1f, 0.1f, 0.1f);
+
+
 
 	// Set Point Light Properties for multi-light
 	glUniform3f(pointLightLoc, lightPos.x, lightPos.y, lightPos.z);
@@ -828,7 +828,6 @@ void draw(SDL_Window * window) {
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
 		GLint diffuseLocation = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
 		glUniform1i(diffuseLocation, 0);
-		
 
 		// bind specular map
 		glActiveTexture(GL_TEXTURE1);
@@ -841,6 +840,15 @@ void draw(SDL_Window * window) {
 		glBindTexture(GL_TEXTURE_2D, emissionMap);
 		GLint emissionLocation = glGetUniformLocation(HSVShaderProgram, "material.emission");
 		glUniform1i(emissionLocation, 2);
+
+		// Set HSV Properties
+		GLint hueShiftLoc = glGetUniformLocation(HSVShaderProgram, "hueShift");
+		GLint satBoostLoc = glGetUniformLocation(HSVShaderProgram, "satBoost");
+		GLint ourImageLoc = glGetUniformLocation(HSVShaderProgram, "ourImage");
+		glUniform3f(ourImageLoc, 1.0f, 1.0f, 0.0f);
+		glUniform1f(satBoostLoc, 1.0f);
+		glUniform1f(hueShiftLoc, hueShift);
+		hueShift += 0.00005f;
 
 		modelMatrix = glm::mat4(1.0);
 		mvStack.push(mvStack.top());

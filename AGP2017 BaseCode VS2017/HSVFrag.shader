@@ -44,7 +44,7 @@ struct SpotLight {
 
 
 in vec3 FragPos; // VertexPosition
-in vec3 Normal; // WorldNormals <-- Normalized in vertex shader
+in vec3 normal; // WorldNormals <-- Normalized in vertex shader
 in vec2 ex_UV; // ex_TexCoords
 
 layout(location = 0) out vec4 out_color; //The result to be outputted
@@ -69,46 +69,47 @@ vec3 hsv2rgb(vec3 hsvColor);
 void main() {
 
 	// Properties
-	vec3 norm = normalize(Normal);
+	vec3 norm = normalize(normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
 
 	// Phase 1: Directional Lighting
 	vec3 result = calcDirLight(dirLight, norm, viewDir);
 
-	// Phase 2: Point lights
-	result += calcPointLight(pointLight, norm, FragPos, viewDir);
+	//// Phase 2: Point lights
+	//result += calcPointLight(pointLight, norm, FragPos, viewDir);
 
-	// Phase 3: Spot light
+	//// Phase 3: Spot light
 
-	result += calcSpotLight(spotLight, norm, FragPos, viewDir);
+	//result += calcSpotLight(spotLight, norm, FragPos, viewDir);
 
-	// Phase 4: Emission + HSV
+	//// Phase 4: Emission + HSV
 
 
 
-	// Sample the image
-	vec3 rgb = vec3(texture(material.emission, ex_UV));
+	//// Sample the image
+	//vec3 rgb = vec3(texture(material.emission, ex_UV));
 
-	// Look up the corresponding HSV value
-	vec3 hsv = rgb2hsv(rgb);
+	//// Look up the corresponding HSV value
+	//vec3 hsv = rgb2hsv(rgb);
 
-	// Manipulate hue and saturation
-	hsv.x = fract(hsv.x + hueShift);
-	hsv.y *= satBoost;
+	//// Manipulate hue and saturation
+	//hsv.x = fract(hsv.x + hueShift);
+	//hsv.y *= satBoost;
 
-	// Look up the corresponding RGB value
-	vec3 finalEmission = vec3(hsv2rgb(hsv));
+	//// Look up the corresponding RGB value
+	//vec3 finalEmission = vec3(hsv2rgb(hsv));
 
-	//vec3 finalEmission = vec3(texture(material.emission, ex_UV));
+	////vec3 finalEmission = vec3(texture(material.emission, ex_UV));
 
-	vec3 emission = finalEmission;
+	//vec3 emission = finalEmission;
 
-	result += emission;
+	//result += emission;
 
 	// Each light type adds it's contribution to the resulting output color until all light sources are processed.
 	// The resulting color contains the color impact of all the light sources in the scene combined. 
 	out_color = vec4(result, 1.0f);
-	//out_color = vec4(1.0f, 0.5f, 0.31f, 1.0);
+	
+	//out_color = vec4(vec3(texture(material.emission, ex_UV)), 1.0);
 }
 
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
