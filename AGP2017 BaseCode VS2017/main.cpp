@@ -98,6 +98,8 @@ float attQuadratic = 0.0f;
 float theta = 0.0f;
 float theta_refxct = 0.0f;
 
+
+
 // md2 stuff
 md2model tmpModel;
 int currentAnim = 0;
@@ -148,7 +150,7 @@ GLuint textToTexture(const char * str, GLuint textID/*, TTF_Font *font, SDL_Colo
 	} //Do this only when you initialise the texture to avoid memory leakage
 
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, stringImage->w, stringImage->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, stringImage->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, stringImage->w, stringImage->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, stringImage->pixels);
 	glBindTexture(GL_TEXTURE_2D, NULL);
 
 	SDL_FreeSurface(stringImage);
@@ -208,7 +210,7 @@ GLuint loadBitmap(char *fname) {
 
 	GLuint externalFormat, internalFormat;
 	if (format->Amask) {
-		internalFormat = GL_RGBA;
+		internalFormat = GL_SRGB_ALPHA;
 		externalFormat = (format->Rmask < format->Bmask) ? GL_RGBA : GL_BGRA;
 	}
 	else {
@@ -216,8 +218,7 @@ GLuint loadBitmap(char *fname) {
 		externalFormat = (format->Rmask < format->Bmask) ? GL_RGB : GL_BGR;
 	}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, tmpSurface->w, tmpSurface->h, 0,
-		externalFormat, GL_UNSIGNED_BYTE, tmpSurface->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, tmpSurface->w, tmpSurface->h, 0, externalFormat, GL_UNSIGNED_BYTE, tmpSurface->pixels);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	SDL_FreeSurface(tmpSurface); // texture loaded, free the temporary buffer
@@ -258,10 +259,9 @@ GLuint loadCubeMap(const char *fname[6], GLuint *texID)
 
 		// skybox textures should not have alpha (assuming this is true!)
 		SDL_PixelFormat *format = tmpSurface->format;
-		externalFormat = (format->Rmask < format->Bmask) ? GL_RGB : GL_BGR;
+		externalFormat = (format->Rmask < format->Bmask) ? GL_RGBA : GL_BGR;
 
-		glTexImage2D(sides[i], 0, GL_RGB, tmpSurface->w, tmpSurface->h, 0,
-			externalFormat, GL_UNSIGNED_BYTE, tmpSurface->pixels);
+		glTexImage2D(sides[i], 0, GL_SRGB_ALPHA, tmpSurface->w, tmpSurface->h, 0, externalFormat, GL_UNSIGNED_BYTE, tmpSurface->pixels);
 		// texture loaded, free the temporary buffer
 		SDL_FreeSurface(tmpSurface);
 	}
@@ -387,7 +387,9 @@ void init(void) {
 	// otherwise mipmaps are assumed
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, reflectionWidth, reflectionHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, reflectionWidth, reflectionHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+
+	// random comment test
 
 	// Map COLOR_ATTACHMENT0 to texture & DEPTH_ATTACHMENT to depth buffer RBO
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTex, 0);
@@ -407,7 +409,14 @@ void init(void) {
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	glEnable(GL_FRAMEBUFFER_SRGB);
+	
+	/*
+	GL_FRAMEBUFFER_SRGB:
+	Tell OpenGL that each subsequent drawing commands should first gamma correct colors from the sRGB color space before storing them in color buffer(s).
+	sRGB is the color space, which roughly corresponds to a gamma of 2,2 and a standard for most home devices.
+	*/
+	glEnable(GL_FRAMEBUFFER_SRGB); 
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 
