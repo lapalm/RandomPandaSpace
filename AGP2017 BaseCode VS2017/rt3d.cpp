@@ -256,10 +256,13 @@ void setMaterial(const GLuint program, const materialStruct material) {
 	// pass in material data to shader 
 	int uniformIndex = glGetUniformLocation(program, "material.ambient");
 	glUniform4fv(uniformIndex, 1, material.ambient);
+
 	uniformIndex = glGetUniformLocation(program, "material.diffuse");
 	glUniform4fv(uniformIndex, 1, material.diffuse);
+
 	uniformIndex = glGetUniformLocation(program, "material.specular");
 	glUniform4fv(uniformIndex, 1, material.specular);
+
 	uniformIndex = glGetUniformLocation(program, "material.shininess");
 	glUniform1f(uniformIndex, material.shininess);
 }
@@ -269,7 +272,6 @@ void drawMesh(const GLuint mesh, const GLuint numVerts, const GLuint primitive) 
 	glDrawArrays(primitive, 0, numVerts);	// draw first vertex array object
 	glBindVertexArray(0);
 }
-
 
 void drawIndexedMesh(const GLuint mesh, const GLuint indexCount, const GLuint primitive) {
 	glBindVertexArray(mesh);	// Bind mesh VAO

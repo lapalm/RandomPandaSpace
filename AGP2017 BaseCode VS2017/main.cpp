@@ -298,6 +298,7 @@ void init(void) {
 	glUniform1f(uniformIndex, attLinear);
 	uniformIndex = glGetUniformLocation(envmapProgram, "attQuadratic");
 	glUniform1f(uniformIndex, attQuadratic);
+
 	// Binding tex handles to tex units to samplers under programmer control
 	// set cubemap sampler to texture unit 1, arbitrarily
 	uniformIndex = glGetUniformLocation(envmapProgram, "textureUnit1");
@@ -342,10 +343,9 @@ void init(void) {
 	GLint lightPosLoc = glGetUniformLocation(HSVShaderProgram, "lightPos"); 
 	GLint lightPositionLoc = glGetUniformLocation(HSVShaderProgram, "light.position");
 	GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
-	GLint matAmbientLoc = glGetUniformLocation(HSVShaderProgram, "material.ambient");
-	GLint matDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
-	GLint matSpecularLoc = glGetUniformLocation(HSVShaderProgram, "material.specular");
-	GLint matShineLoc = glGetUniformLocation(HSVShaderProgram, "material.shininess");
+
+	
+
 	GLint lightAmbientLoc = glGetUniformLocation(HSVShaderProgram, "light.ambient");
 	GLint lightDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "light.diffuse");
 	GLint lightSpecularLoc = glGetUniformLocation(HSVShaderProgram, "light.specular");
@@ -376,24 +376,20 @@ void init(void) {
 	GLint linearPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.linear");
 	GLint quadraticPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.quadratic");
 
-	// Multi-light - spotLight
-	GLint spotLightPositionLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.position");
-	GLint spotLightDirectionLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.direction");
-	GLint ambientSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.ambient");
-	GLint diffuseSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.diffuse");
-	GLint specularSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.specular");
-	GLint constantSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.constant");
-	GLint linearSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.linear");
-	GLint quadraticSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.quadratic");
-	GLint cutOffSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.cutOff");
-	GLint outerCutOffSpotLightLoc = glGetUniformLocation(HSVShaderProgram, "spotLight.outerCutOff");
+
+
 
 	//glUniform3f(objectColorLoc, color.x, color.y, color.z);
 	glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f); // Also set light's color (white)
 	glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-	//glUniform3f(viewPosLoc, camera->getPosition().x, camera->getPosition().y, camera->getPosition().z); <--- Check
+	glUniform3f(viewPosLoc, eye.x, eye.y, eye.z); 
 
 	// Set Material Properties
+
+	GLint matAmbientLoc = glGetUniformLocation(HSVShaderProgram, "material.ambient");
+	GLint matDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
+	GLint matSpecularLoc = glGetUniformLocation(HSVShaderProgram, "material.specular");
+	GLint matShineLoc = glGetUniformLocation(HSVShaderProgram, "material.shininess");
 	glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
 	glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
 	glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
@@ -488,11 +484,6 @@ void init(void) {
 	textures[3] = loadBitmap("lavaTexture.bmp");
 	textures[4] = loadBitmap("container2.bmp");
 	textures[5] = loadBitmap("container2_specular.bmp");
-
-	unsigned int diffuseMap = textures[4];
-	unsigned int specularMap = textures[5];
-	unsigned int emissionMap = textures[3];
-	
 
 
 	///////////////////
@@ -606,6 +597,10 @@ void update(void) {
 
 
 void draw(SDL_Window * window) {
+
+	unsigned int diffuseMap = textures[4];
+	unsigned int specularMap = textures[5];
+	unsigned int emissionMap = textures[3];
 
 	// clear the screen
 	glEnable(GL_CULL_FACE);
@@ -765,21 +760,7 @@ void draw(SDL_Window * window) {
 		rt3d::drawIndexedMesh(meshObjects[2], toonIndexCount, GL_TRIANGLES);
 		mvStack.pop();
 
-		// draw the HSV bunny
-		glUseProgram(HSVShaderProgram);
-		rt3d::setUniformMatrix4fv(HSVShaderProgram, "projection", glm::value_ptr(projection));
-		mvStack.push(mvStack.top());
-		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(3.0f, 0.0f, -2.0f));
-		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(10.0f, 10.0f, 10.0f));
-		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-		hueShift += 0.00005f;
-		/*rt3d::setLight(HSVShaderProgram, light0);
-		rt3d::setLightPos(HSVShaderProgram, glm::value_ptr(tmp));*/
-
-		rt3d::setUniformMatrix3fv(HSVShaderProgram, "normalmatrix", glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(mvStack.top())))));
-		rt3d::drawIndexedMesh(meshObjects[2], toonIndexCount, GL_TRIANGLES);
-		mvStack.pop();
-
+		
 
 		// draw the statue with mixed reflection and refraction
 		glUseProgram(reflectrefractShaderProgram);
@@ -815,9 +796,7 @@ void draw(SDL_Window * window) {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skybox[0]);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textures[2]); // studded metal
-
-		
+		glBindTexture(GL_TEXTURE_2D, textures[3]); // lava texture
 		
 		glm::mat4 modelMatrix(1.0);
 		mvStack.push(mvStack.top());
@@ -832,13 +811,56 @@ void draw(SDL_Window * window) {
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(eye));
 		rt3d::setMaterial(envmapProgram, material1);
 		rt3d::drawIndexedMesh(meshObjects[0], meshIndexCount, GL_TRIANGLES);
-		mvStack.pop();
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textures[3]); // lavaTexture
-		
 		// remember to use at least one pop operation per push...
 		mvStack.pop(); // initial matrix
+		
+
+		// Draw cube using HSV Shader
+		glUseProgram(HSVShaderProgram);
+		rt3d::setLightPos(HSVShaderProgram, glm::value_ptr(tmp));
+		rt3d::setUniformMatrix4fv(HSVShaderProgram, "projection", glm::value_ptr(projection));
+
+		// Now bind textures to texture units
+
+		// bind diffuse map
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+		GLint diffuseLocation = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
+		glUniform1i(diffuseLocation, 0);
+		
+
+		// bind specular map
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+		GLint specularLocation = glGetUniformLocation(HSVShaderProgram, "material.specular");
+		glUniform1i(diffuseLocation, 1);
+
+		// bind emission map
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, emissionMap);
+		GLint emissionLocation = glGetUniformLocation(HSVShaderProgram, "material.emission");
+		glUniform1i(emissionLocation, 2);
+
+		modelMatrix = glm::mat4(1.0);
+		mvStack.push(mvStack.top());
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 2.5f, -1.0f));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+
+		mvStack.top() = mvStack.top() * modelMatrix;
+
+		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
+		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelMatrix", glm::value_ptr(modelMatrix));
+
+		//glUniform3fv(uniformIndex, 1, glm::value_ptr(eye));
+		//rt3d::setMaterial(HSVShaderProgram, material1);
+		rt3d::drawIndexedMesh(meshObjects[0], meshIndexCount, GL_TRIANGLES);
+
+		// remember to use at least one pop operation per push...
+		mvStack.pop(); // initial matrix
+
+
+
 		glDepthMask(GL_TRUE);
 
 
