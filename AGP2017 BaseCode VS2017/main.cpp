@@ -271,6 +271,7 @@ GLuint loadCubeMap(const char *fname[6], GLuint *texID)
 
 void init(void) {
 
+	// Basic Shader Program
 	shaderProgram = rt3d::initShaders("phong-tex.vert", "phong-tex.frag");
 	rt3d::setLight(shaderProgram, light0);
 	rt3d::setMaterial(shaderProgram, material0);
@@ -282,13 +283,13 @@ void init(void) {
 	uniformIndex = glGetUniformLocation(shaderProgram, "attQuadratic");
 	glUniform1f(uniformIndex, attQuadratic);
 
-
+	// Enviroment Shader Program
 	envmapProgram = rt3d::initShaders("phongEnvMap.vert", "phongEnvMap.frag");
 	rt3d::setLight(envmapProgram, light0);
 	rt3d::setMaterial(envmapProgram, material1);
 	// set light attenuation shader uniforms
 	uniformIndex = glGetUniformLocation(envmapProgram, "attConst");
-	glUniform1f(uniformIndex, attConstant);
+	glUniform1f(uniformIndex, attConstant); 
 	uniformIndex = glGetUniformLocation(envmapProgram, "attLinear");
 	glUniform1f(uniformIndex, attLinear);
 	uniformIndex = glGetUniformLocation(envmapProgram, "attQuadratic");
@@ -301,6 +302,7 @@ void init(void) {
 	uniformIndex = glGetUniformLocation(envmapProgram, "textureUnit0");
 	glUniform1i(uniformIndex, 0);
 
+	// Toon Shader Program
 	toonShaderProgram = rt3d::initShaders("toon.vert", "toon.frag");
 	rt3d::setLight(toonShaderProgram, light0);
 	rt3d::setMaterial(toonShaderProgram, material0);
@@ -324,6 +326,9 @@ void init(void) {
 	// set cubemap sampler to texture unit 1, arbitrarily
 	uniformIndex = glGetUniformLocation(reflectrefractShaderProgram, "texture1_skycube");
 	glUniform1i(uniformIndex, 1);
+
+	// Advanced Lighting Shader (w/Gamma Correction)
+
 
 	textureProgram = rt3d::initShaders("textured.vert", "textured.frag");
 	skyboxProgram = rt3d::initShaders("cubeMap.vert", "cubeMap.frag");
