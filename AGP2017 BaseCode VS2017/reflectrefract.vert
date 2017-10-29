@@ -6,14 +6,16 @@ uniform vec4 lightPosition;
 
 uniform mat4 modelMatrix;
 uniform vec3 cameraPos;
-out vec3 ex_WorldNorm;
-out vec3 ex_WorldView;
+
 
 in  vec3 in_Position;
 in  vec3 in_Normal;
+
 out vec3 ex_N;
 out vec3 ex_V;
 out vec3 ex_L;
+out vec3 ex_WorldNorm;
+out vec3 ex_WorldView;
 
 
 out float ex_D;
@@ -26,6 +28,7 @@ void main(void) {
 	// vertex into eye coordinates
 	vec4 vertexPosition = modelview * vec4(in_Position,1.0);
 	ex_D = distance(vertexPosition,lightPosition);
+
 	// Find V - in eye coordinates, eye is at (0,0,0)
 	ex_V = normalize(-vertexPosition).xyz;
 
@@ -34,6 +37,7 @@ void main(void) {
 	// (if scaling is includes, should use transpose inverse modelview matrix!)
 	// this is somewhat wasteful in compute time and should really be part of the cpu program,
 	// giving an additional uniform input
+
 	mat3 normalmatrix = transpose(inverse(mat3(modelview)));
 	ex_N = normalize(normalmatrix * in_Normal);
 

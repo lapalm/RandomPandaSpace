@@ -848,7 +848,7 @@ void draw(SDL_Window * window) {
 		glUniform3f(ourImageLoc, 1.0f, 1.0f, 0.0f);
 		glUniform1f(satBoostLoc, 1.0f);
 		glUniform1f(hueShiftLoc, hueShift);
-		hueShift += 0.00005f;
+		
 
 		modelMatrix = glm::mat4(1.0);
 		mvStack.push(mvStack.top());
@@ -906,6 +906,7 @@ int main(int argc, char *argv[]) {
 		}
 		update();
 		draw(hWindow); // call the draw function
+		hueShift += 0.005f;
 	}
 
 	SDL_GL_DeleteContext(glContext);

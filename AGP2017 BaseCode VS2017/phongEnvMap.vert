@@ -18,11 +18,11 @@ out vec3 ex_WorldView;
 
 in  vec3 in_Position;
 in  vec3 in_Normal;
+in vec2 in_TexCoord;
+
 out vec3 ex_N;
 out vec3 ex_V;
 out vec3 ex_L;
-
-in vec2 in_TexCoord;
 out vec2 ex_TexCoord;
 out float ex_D;
 

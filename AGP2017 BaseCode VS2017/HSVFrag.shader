@@ -72,8 +72,8 @@ void main() {
 	vec3 norm = normalize(normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
 
-	// Phase 1: Directional Lighting
-	vec3 result = calcDirLight(dirLight, norm, viewDir);
+	//// Phase 1: Directional Lighting
+	//vec3 result = calcDirLight(dirLight, norm, viewDir);
 
 	//// Phase 2: Point lights
 	//result += calcPointLight(pointLight, norm, FragPos, viewDir);
@@ -82,32 +82,31 @@ void main() {
 
 	//result += calcSpotLight(spotLight, norm, FragPos, viewDir);
 
-	//// Phase 4: Emission + HSV
+	// Phase 4: Emission + HSV
 
+	// Sample the image
+	vec3 rgb = vec3(texture(material.emission, ex_UV));
 
+	// Look up the corresponding HSV value
+	vec3 hsv = rgb2hsv(rgb);
 
-	//// Sample the image
-	//vec3 rgb = vec3(texture(material.emission, ex_UV));
+	// Manipulate hue and saturation
+	hsv.x = fract(hsv.x + hueShift);
+	hsv.y *= satBoost;
 
-	//// Look up the corresponding HSV value
-	//vec3 hsv = rgb2hsv(rgb);
+	// Look up the corresponding RGB value
+	vec3 finalEmission = vec3(hsv2rgb(hsv));
 
-	//// Manipulate hue and saturation
-	//hsv.x = fract(hsv.x + hueShift);
-	//hsv.y *= satBoost;
+	//vec3 finalEmission = vec3(texture(material.emission, ex_UV));
 
-	//// Look up the corresponding RGB value
-	//vec3 finalEmission = vec3(hsv2rgb(hsv));
+	vec3 emission = finalEmission;
 
-	////vec3 finalEmission = vec3(texture(material.emission, ex_UV));
-
-	//vec3 emission = finalEmission;
-
-	//result += emission;
+	vec3 result = emission;
 
 	// Each light type adds it's contribution to the resulting output color until all light sources are processed.
 	// The resulting color contains the color impact of all the light sources in the scene combined. 
 	out_color = vec4(result, 1.0f);
+	out_color.a = 1.0;
 	
 	//out_color = vec4(vec3(texture(material.emission, ex_UV)), 1.0);
 }
