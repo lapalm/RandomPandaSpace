@@ -578,12 +578,14 @@ void draw(SDL_Window * window) {
 		rt3d::setLightPos(shaderProgram, glm::value_ptr(tmp));
 		glBindTexture(GL_TEXTURE_2D, textures[2]); // studded steel texture
 		mvStack.push(mvStack.top());
+
 		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(lightPos[0], lightPos[1], lightPos[2]));
 		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(0.25f, 0.25f, 0.25f));
 		rt3d::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
 		rt3d::setMaterial(shaderProgram, material0);
 		rt3d::setLightPos(shaderProgram, glm::value_ptr(tmp));
 		rt3d::drawIndexedMesh(meshObjects[0], meshIndexCount, GL_TRIANGLES);
+
 		mvStack.pop();
 
 		

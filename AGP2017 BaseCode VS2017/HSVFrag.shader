@@ -45,7 +45,7 @@ struct SpotLight {
 
 in vec3 FragPos;
 in vec3 Normal;
-in vec2 UV;
+in vec2 in_UV;
 
 out vec4 color;
 
