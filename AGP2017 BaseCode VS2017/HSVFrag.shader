@@ -106,7 +106,7 @@ void main() {
 
 	// Each light type adds it's contribution to the resulting output color until all light sources are processed.
 	// The resulting color contains the color impact of all the light sources in the scene combined. 
-	out_color = vec4(result, 1.0);
+	out_color = vec4(normal, 1.0);
 	out_color.a = 1.0;
 	
 	//out_color = vec4(vec3(texture(material.emission, ex_UV)), 1.0);
@@ -125,7 +125,7 @@ vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 
 	// Combine results
 	//vec3 ambient = light.ambient * vec3(texture(material.diffuse, ex_UV));
-	vec3 diffuse =  vec3(texture(material.diffuse, ex_UV));
+	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, ex_UV));
 	//vec3 specular = light.specular * spec * vec3(texture(material.specular, ex_UV));
 
 	return (diffuse);// ambient + diffuse + specular);

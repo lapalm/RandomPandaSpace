@@ -359,11 +359,10 @@ void init(void) {
 	GLint lightSpotCutOffLoc = glGetUniformLocation(HSVShaderProgram, "light.cutOff");
 	GLint lightSpotOuterCutOffLoc = glGetUniformLocation(HSVShaderProgram, "light.outerCutOff");
 
-	// Multi-light - dirLight
-	GLint dirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.direction");
-	GLint ambientDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.ambient");
-	GLint diffuseDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.diffuse");
-	GLint specularDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.specular");
+
+
+	/*uniformIndex = glGetUniformLocation(HSVShaderProgram, "dirLight.direction");
+	glUniform1f(uniformIndex, )*/
 
 	// Multi-light - pointLight
 	GLint pointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.direction");
@@ -404,13 +403,6 @@ void init(void) {
 	//glUniform1f(lightLinearPos, 0.022f);
 	//glUniform1f(lightQuadraticPos, 0.0019f);
 
-	// Set Directional Light Properties for multi-light
-	
-	//glUniform3f(dirLightLoc, sunPos.x, sunPos.y, sunPos.z); <---- Fix back to sun after debug from lightPos.
-	glUniform3f(dirLightLoc, lightPos.x, lightPos.y, lightPos.z);
-	glUniform3f(ambientDirLightLoc, 0.05f, 0.05f, 0.05f);
-	glUniform3f(diffuseDirLightLoc, 0.05f, 0.05f, 0.05f); // Darken the light a bit to fit the scene
-	glUniform3f(specularDirLightLoc, 0.1f, 0.1f, 0.1f);
 
 	// Set Point Light Properties for multi-light
 	glUniform3f(pointLightLoc, lightPos.x, lightPos.y, lightPos.z);
@@ -449,7 +441,11 @@ void init(void) {
 	meshIndexCount = indices.size();
 	
 	meshObjects[0] = rt3d::createMesh(verts.size() / 3, verts.data(), nullptr, norms.data(), tex_coords.data(), meshIndexCount, indices.data());
-
+	
+	// Checking for normals
+	/*for (int i = 0; i < norms.size(); i++) {
+		cout << norms[i] << endl;
+	}*/
 	
 	meshObjects[1] = tmpModel.ReadMD2Model("tris.MD2");
 	md2VertCount = tmpModel.getVertDataCount();
@@ -809,8 +805,23 @@ void draw(SDL_Window * window) {
 
 		// Draw cube using HSV Shader
 		glUseProgram(HSVShaderProgram);
-		rt3d::setLightPos(HSVShaderProgram, glm::value_ptr(tmp));
+		//rt3d::setLightPos(HSVShaderProgram, glm::value_ptr(tmp));
 		rt3d::setUniformMatrix4fv(HSVShaderProgram, "projection", glm::value_ptr(projection));
+
+		// Set Directional Light Properties for multi-light
+
+		// Multi-light - dirLight
+		GLint dirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.direction");
+		GLint ambientDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.ambient");
+		GLint diffuseDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.diffuse");
+		GLint specularDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.specular");
+
+		//glUniform3f(dirLightLoc, sunPos.x, sunPos.y, sunPos.z); <---- Fix back to sun after debug from lightPos.
+		glUniform3f(dirLightLoc, lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(ambientDirLightLoc, 0.05f, 0.05f, 0.05f);
+		glUniform3f(diffuseDirLightLoc,  0.05f, 0.05f, 0.05f); // Darken the light a bit to fit the scene
+		glUniform3f(specularDirLightLoc, 0.1f, 0.1f, 0.1f);
+
 
 		// Now bind textures to texture units
 
