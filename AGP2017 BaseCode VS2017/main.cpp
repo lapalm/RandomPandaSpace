@@ -76,9 +76,9 @@ rt3d::lightStruct light0 = {
 	{-5.0f, 2.0f, 2.0f, 1.0f}  // position
 };
 
-glm::vec4 lightPos(-5.0f, 2.0f, 2.0f, 1.0f); //light position
+//glm::vec4 lightPos(-5.0f, 2.0f, 2.0f, 1.0f); //light position
 float hueShift = 0.0f; // HSV hue shift
-glm::vec3 sunPos(0.0f, 100.0f, 0.0f); // Position of the sun
+glm::vec4 lightPos(0.0f, 100.0f, 0.0f, 1.0f); // Position of the sun <----- fix to vec3
 
 rt3d::materialStruct material0 = {
 	{0.4f, 0.4f, 0.4f, 1.0f}, // ambient
@@ -335,16 +335,16 @@ void init(void) {
 	// HSV ShaderProgram (w/Gamma Correction <--- To be added soon!)
 
 	HSVShaderProgram = rt3d::initShaders("HSVVert.shader", "HSVFrag.shader");
+	/*rt3d::setLight(HSVShaderProgram, light0);
+	rt3d::setMaterial(HSVShaderProgram, material0);*/
 
 	// Don't forget to 'use' the corresponding shader program first (to set the uniform)
 
 	GLint objectColorLoc = glGetUniformLocation(HSVShaderProgram, "objectColor");
 	GLint lightColorLoc = glGetUniformLocation(HSVShaderProgram, "lightColor");
-	GLint lightPosLoc = glGetUniformLocation(HSVShaderProgram, "lightPos"); 
+	GLint lightPosLoc = glGetUniformLocation(HSVShaderProgram, "lightPos");
 	GLint lightPositionLoc = glGetUniformLocation(HSVShaderProgram, "light.position");
 	GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
-
-	
 
 	GLint lightAmbientLoc = glGetUniformLocation(HSVShaderProgram, "light.ambient");
 	GLint lightDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "light.diffuse");
@@ -353,8 +353,7 @@ void init(void) {
 	GLint lightConstantPos = glGetUniformLocation(HSVShaderProgram, "light.constant");
 	GLint lightLinearPos = glGetUniformLocation(HSVShaderProgram, "light.linear");
 	GLint lightQuadraticPos = glGetUniformLocation(HSVShaderProgram, "light.quadratic");
-	
-	
+
 	GLint lightSpotLoc = glGetUniformLocation(HSVShaderProgram, "light.spotPosition");
 	GLint lightSpotdirLoc = glGetUniformLocation(HSVShaderProgram, "light.spotDirection");
 	GLint lightSpotCutOffLoc = glGetUniformLocation(HSVShaderProgram, "light.cutOff");
@@ -375,13 +374,10 @@ void init(void) {
 	GLint linearPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.linear");
 	GLint quadraticPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.quadratic");
 
-
-
-
 	//glUniform3f(objectColorLoc, color.x, color.y, color.z);
 	glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f); // Also set light's color (white)
 	glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-	glUniform3f(viewPosLoc, eye.x, eye.y, eye.z); 
+	glUniform3f(viewPosLoc, eye.x, eye.y, eye.z);
 
 	// Set Material Properties
 
@@ -389,6 +385,7 @@ void init(void) {
 	GLint matDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
 	GLint matSpecularLoc = glGetUniformLocation(HSVShaderProgram, "material.specular");
 	GLint matShineLoc = glGetUniformLocation(HSVShaderProgram, "material.shininess");
+
 	glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
 	glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
 	glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
@@ -407,20 +404,13 @@ void init(void) {
 	//glUniform1f(lightLinearPos, 0.022f);
 	//glUniform1f(lightQuadraticPos, 0.0019f);
 
-	
-	
-
-	// Set Spotlight Properties
-
 	// Set Directional Light Properties for multi-light
+	
 	//glUniform3f(dirLightLoc, sunPos.x, sunPos.y, sunPos.z); <---- Fix back to sun after debug from lightPos.
 	glUniform3f(dirLightLoc, lightPos.x, lightPos.y, lightPos.z);
-
 	glUniform3f(ambientDirLightLoc, 0.05f, 0.05f, 0.05f);
 	glUniform3f(diffuseDirLightLoc, 0.05f, 0.05f, 0.05f); // Darken the light a bit to fit the scene
 	glUniform3f(specularDirLightLoc, 0.1f, 0.1f, 0.1f);
-
-
 
 	// Set Point Light Properties for multi-light
 	glUniform3f(pointLightLoc, lightPos.x, lightPos.y, lightPos.z);
@@ -430,6 +420,9 @@ void init(void) {
 	glUniform1f(constantPointLightLoc, 1.0f);
 	glUniform1f(linearPointLightLoc, 0.045f);
 	glUniform1f(quadraticPointLightLoc, 0.0075f);
+
+	// Set Spotlight Properties
+	//(Removed)
 
 
 	textureProgram = rt3d::initShaders("textured.vert", "textured.frag");
@@ -532,7 +525,7 @@ void init(void) {
 	Tell OpenGL that each subsequent drawing commands should first gamma correct colors from the sRGB color space before storing them in color buffer(s).
 	sRGB is the color space, which roughly corresponds to a gamma of 2,2 and a standard for most home devices.
 	*/
-	glEnable(GL_FRAMEBUFFER_SRGB); 
+	glEnable(GL_FRAMEBUFFER_SRGB); //<----- Done in HSVFrag.shader instead
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
@@ -760,8 +753,6 @@ void draw(SDL_Window * window) {
 		rt3d::drawIndexedMesh(meshObjects[2], toonIndexCount, GL_TRIANGLES);
 		mvStack.pop();
 
-		
-
 		// draw the statue with mixed reflection and refraction
 		glUseProgram(reflectrefractShaderProgram);
 		glActiveTexture(GL_TEXTURE1);
@@ -833,7 +824,7 @@ void draw(SDL_Window * window) {
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specularMap);
 		GLint specularLocation = glGetUniformLocation(HSVShaderProgram, "material.specular");
-		glUniform1i(diffuseLocation, 1);
+		glUniform1i(specularLocation, 1);
 
 		// bind emission map
 		glActiveTexture(GL_TEXTURE2);
