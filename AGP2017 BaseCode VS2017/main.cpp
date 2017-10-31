@@ -76,9 +76,9 @@ rt3d::lightStruct light0 = {
 	{-5.0f, 2.0f, 2.0f, 1.0f}  // position
 };
 
-glm::vec4 lightPos(-5.0f, 2.0f, 2.0f, 1.0f); 
+glm::vec4 lightPos(0.0f, 5.0f, 0.0f, 1.0f); 
 float hueShift = 0.0f; // HSV hue shift
-glm::vec4 sunPOs(0.0f, 0.0f, 0.0f, 1.0f); 
+
 
 rt3d::materialStruct material0 = {
 	{0.4f, 0.4f, 0.4f, 1.0f}, // ambient
@@ -704,11 +704,11 @@ void draw(SDL_Window * window) {
 		// Set Point Light Properties for multi-light
 		glUniform3f(pointLightLoc, tmp.x, tmp.y, tmp.z);
 		glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
-		glUniform3f(diffusePointLightLoc, 0.1f, 0.1f, 0.1f);
-		glUniform3f(specularPointLightLoc, 0.5f, 0.5f, 0.5f);
+		glUniform3f(diffusePointLightLoc, 0.8f, 0.8f, 0.8f);
+		glUniform3f(specularPointLightLoc, 1.0f, 1.0f, 1.0f);
 		glUniform1f(constantPointLightLoc, 1.0f);
-		glUniform1f(linearPointLightLoc, 0.045f);
-		glUniform1f(quadraticPointLightLoc, 0.0075f);
+		glUniform1f(linearPointLightLoc, 0.09f);
+		glUniform1f(quadraticPointLightLoc, 0.032);
 
 		// Set Material Properties
 
@@ -764,7 +764,7 @@ void draw(SDL_Window * window) {
 		// remember to use at least one pop operation per push...
 		mvStack.pop(); // initial matrix
 
-
+		mvStack.pop();
 
 		glDepthMask(GL_TRUE);
 

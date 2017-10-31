@@ -44,27 +44,27 @@ void main() {
 	vec3 normal = normalize(ex_Normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
 
-	//// Phase 1: Point lights
+	// Phase 1: Point lights
 	vec3 result = calcPointLight(pointLight, normal, FragPos, viewDir);
 
-	// phase 2: emission + hsv
+	//// phase 2: emission + hsv
 
-	// sample the image
-	vec3 rgb = vec3(texture(material.emission, ex_UV));
-	
-	// look up the corresponding hsv value
-	vec3 hsv = rgb2hsv(rgb);
+	//// sample the image
+	//vec3 rgb = vec3(texture(material.emission, ex_UV));
+	//
+	//// look up the corresponding hsv value
+	//vec3 hsv = rgb2hsv(rgb);
 
-	// manipulate hue and saturation
-	hsv.x = fract(hsv.x + hueShift);
-	hsv.y *= satBoost;
+	//// manipulate hue and saturation
+	//hsv.x = fract(hsv.x + hueShift);
+	//hsv.y *= satBoost;
 
-	// look up the corresponding rgb value
-	vec3 finalemission = vec3(hsv2rgb(hsv));
+	//// look up the corresponding rgb value
+	//vec3 finalemission = vec3(hsv2rgb(hsv));
 
-	vec3 emission = finalemission;
+	//vec3 emission = finalemission;
 
-	result += emission;
+	//result += emission;
 
 	//phase 3: gamma correct
 	float gammaValue = 2.2;
@@ -79,8 +79,6 @@ void main() {
 	// The resulting color contains the color impact of all the light sources in the scene combined. 
 	out_color = vec4(result, 1.0);
 	out_color.a = 1.0;
-	
-	//out_color = vec4(vec3(texture(material.emission, ex_UV)), 1.0);
 }
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
@@ -107,7 +105,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
 	diffuse *= attenuation;
 	specular *= attenuation;
 
-	return normalize(light.position); //(ambient + diffuse + specular);
+	return (ambient + diffuse + specular);
 }
 
 vec3 rgb2hsv(vec3 rgbColor)
