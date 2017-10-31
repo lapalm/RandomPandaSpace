@@ -46,8 +46,8 @@ void main() {
 
 	// Properties
 	vec3 normal = normalize(ex_Normal);
-	//vec3 viewDir = normalize(viewPos - FragPos);
-	vec3 viewDir = normalize(-FragPos).xyz;
+	vec3 viewDir = normalize(viewPos - FragPos);
+	//vec3 viewDir = normalize(-FragPos).xyz;
 
 	// Phase 1: Point lights
 	vec3 result = calcPointLight(pointLight, normal, FragPos, viewDir);
