@@ -41,6 +41,7 @@ void main(void) {
 	// (if scaling is includes, should use transpose inverse modelview matrix!)
 	// this is somewhat wasteful in compute time and should really be part of the cpu program,
 	// giving an additional uniform input
+
 	mat3 normalmatrix = transpose(inverse(mat3(modelview)));
 	ex_N = normalize(normalmatrix * in_Normal);
 

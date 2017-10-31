@@ -47,10 +47,17 @@ in vec3 FragPos; // VertexPosition
 in vec3 normal; // WorldNormals <-- Normalized in vertex shader
 in vec2 ex_UV; // ex_TexCoords
 
+in vec3 ex_V;
+in vec3 ex_L;
+
+in vec3 ex_WorldNorm;
+in vec3 ex_WorldView;
+
+
 layout(location = 0) out vec4 out_color; //The result to be outputted
 
 // Put uniforms here:
-uniform vec3 viewPos;
+uniform vec3 viewPos; // Currently replaced by ex_L
 uniform DirLight dirLight;
 uniform PointLight pointLight;
 uniform SpotLight spotLight;
@@ -71,6 +78,7 @@ void main() {
 	// Properties
 	vec3 norm = normalize(normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
+	//vec3 viewDir = normalize(ex_L);
 
 	// Phase 1: Directional Lighting
 	vec3 result = calcDirLight(dirLight, norm, viewDir);
@@ -106,7 +114,7 @@ void main() {
 
 	// Each light type adds it's contribution to the resulting output color until all light sources are processed.
 	// The resulting color contains the color impact of all the light sources in the scene combined. 
-	out_color = vec4(normal, 1.0);
+	out_color = vec4(result, 1.0);
 	out_color.a = 1.0;
 	
 	//out_color = vec4(vec3(texture(material.emission, ex_UV)), 1.0);
@@ -120,15 +128,21 @@ vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 	float diff = max(dot(normal, lightDir), 0.0); // Use Max to avoid dot product going negative when vector is greater than 90 degrees.
 
 	// Specular 
-	vec3 reflectDir = reflect(-lightDir, normal);
+	// Calculate R - reflection of light
+	
+	// Pablo's method
+	vec3 R = normalize(reflect(normalize(-ex_L), normalize(normal)));
+	//float spec = pow(max(dot(ex_V, R), 0.0), material.shininess);
+	
+	vec3 reflectDir = reflect(lightDir, normal);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
 	// Combine results
-	//vec3 ambient = light.ambient * vec3(texture(material.diffuse, ex_UV));
+	vec3 ambient = light.ambient * vec3(texture(material.diffuse, ex_UV));
 	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, ex_UV));
-	//vec3 specular = light.specular * spec * vec3(texture(material.specular, ex_UV));
+	vec3 specular = light.specular * spec * vec3(texture(material.specular, ex_UV));
 
-	return (diffuse);// ambient + diffuse + specular);
+	return (ambient + diffuse + specular);
 
 }
 
