@@ -15,12 +15,14 @@ void main()
 {
 	ex_UV = in_UV;
 
-	FragPos = vec3(modelMatrix * vec4(in_Position, 1.0f));
-
 	// the transpose of the inverse of the upper-left corner of the model matrix : 
 	// see http://www.lighthouse3d.com/tutorials/glsl-12-tutorial/the-normal-matrix/ // <- try to do in CPU instead. Less expensive.
 	ex_Normal = mat3(transpose(inverse(modelMatrix))) * in_Normal; // World Normal
 
-	gl_Position = projection * modelview * vec4(in_Position, 1.0f);
+	//FragPos = vec3(modelMatrix * vec4(in_Position, 1.0f));
+	//gl_Position = projection * modelview * vec4(FragPos, 1.0f);
+
+	FragPos = vec3(modelview * vec4(in_Position, 1.0f));
+	gl_Position = projection * vec4(FragPos, 1.0f);
 
 }

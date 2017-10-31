@@ -720,7 +720,7 @@ void draw(SDL_Window * window) {
 
 		// Set Point Light Properties for multi-light
 		glUniform3f(pointLightLoc, light0.position[0], light0.position[1], light0.position[2]);
-		cout << light0.position[0] << endl;
+		//cout << light0.position[0] << endl;
 		glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
 		glUniform3f(diffusePointLightLoc, 0.8f, 0.8f, 0.8f);
 		glUniform3f(specularPointLightLoc, 1.0f, 1.0f, 1.0f);
