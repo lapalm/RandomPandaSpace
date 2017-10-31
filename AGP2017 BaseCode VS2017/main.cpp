@@ -76,7 +76,8 @@ rt3d::lightStruct light0 = {
 	{-5.0f, 2.0f, 2.0f, 1.0f}  // position
 };
 
-glm::vec4 lightPos(-5.0f, 2.0f, 2.0f, 1.0f); //light position
+glm::vec4 lightPos(-5.0f, 2.0f, 2.0f, 0.0f); 
+glm::vec4 lightPosition(-5.0f, 2.0f, 2.0f, 0.0f); //light position
 float hueShift = 0.0f; // HSV hue shift
 //glm::vec3 sunPOs(-5.0f, 2.0f, 2.0f, 1.0f); 
 
@@ -363,14 +364,7 @@ void init(void) {
 	/*uniformIndex = glGetUniformLocation(HSVShaderProgram, "dirLight.direction");
 	glUniform1f(uniformIndex, )*/
 
-	// Multi-light - pointLight
-	GLint pointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.direction");
-	GLint ambientPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.ambient");
-	GLint diffusePointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.diffuse");
-	GLint specularPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.specular");
-	GLint constantPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.constant");
-	GLint linearPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.linear");
-	GLint quadraticPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.quadratic");
+
 
 	//glUniform3f(objectColorLoc, color.x, color.y, color.z);
 	//glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f); // Also set light's color (white)
@@ -388,33 +382,6 @@ void init(void) {
 	//cout << "X: " << lightPos.x << " Y: " << lightPos.y <<" Z: " <<lightPos.z << endl;
 	//glUniform3f(lightPositionLoc, lightPos.x, lightPos.y, lightPos.z);
 
-	// Set Material Properties
-
-	GLint matAmbientLoc = glGetUniformLocation(HSVShaderProgram, "material.ambient");
-	GLint matDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
-	GLint matSpecularLoc = glGetUniformLocation(HSVShaderProgram, "material.specular");
-	GLint matShineLoc = glGetUniformLocation(HSVShaderProgram, "material.shininess");
-
-	glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
-	glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
-	glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
-	glUniform1f(matShineLoc, 32.0f);
-
-	// Set Light attenuation properties <- See for value reference: http://www.ogre3d.org/tikiwiki/tiki-index.php?page=-Point+Light+Attenuation
-	// These values are for attenuation distance: 50
-	//glUniform1f(lightConstantPos, 1.0f); 
-	//glUniform1f(lightLinearPos, 0.022f);
-	//glUniform1f(lightQuadraticPos, 0.0019f);
-
-
-	// Set Point Light Properties for multi-light
-	//glUniform3f(pointLightLoc, lightPos.x, lightPos.y, lightPos.z);
-	//glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
-	//glUniform3f(diffusePointLightLoc, 0.1f, 0.1f, 0.1f);
-	//glUniform3f(specularPointLightLoc, 0.5f, 0.5f, 0.5f);
-	//glUniform1f(constantPointLightLoc, 1.0f);
-	//glUniform1f(linearPointLightLoc, 0.045f);
-	//glUniform1f(quadraticPointLightLoc, 0.0075f);
 
 	// Set Spotlight Properties
 	//(Removed)
@@ -811,10 +778,48 @@ void draw(SDL_Window * window) {
 		glUniform3fv(viewPosLoc, 1, glm::value_ptr(eye)); 
 
 		//glUniform3f(dirLightLoc, sunPos.x, sunPos.y, sunPos.z); <---- Fix back to sun after debug from lightPos.
-		glUniform3f(dirLightLoc, lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(dirLightLoc, tmp.x, tmp.y, tmp.z);
 		glUniform3f(ambientDirLightLoc, 0.05f, 0.05f, 0.05f);
 		glUniform3f(diffuseDirLightLoc, 0.05f, 0.05f, 0.05f); // Darken the light a bit to fit the scene
 		glUniform3f(specularDirLightLoc, 0.1f, 0.1f, 0.1f);
+
+		//// Multi-light - pointLight
+		//GLint pointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.direction");
+		//GLint ambientPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.ambient");
+		//GLint diffusePointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.diffuse");
+		//GLint specularPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.specular");
+		//GLint constantPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.constant");
+		//GLint linearPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.linear");
+		//GLint quadraticPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.quadratic");
+
+
+		//// Set Light attenuation properties <- See for value reference: http://www.ogre3d.org/tikiwiki/tiki-index.php?page=-Point+Light+Attenuation
+		//// These values are for attenuation distance: 50
+		////glUniform1f(lightConstantPos, 1.0f); 
+		////glUniform1f(lightLinearPos, 0.022f);
+		////glUniform1f(lightQuadraticPos, 0.0019f);
+
+
+		//// Set Point Light Properties for multi-light
+		//glUniform3f(pointLightLoc, lightPos.x, lightPos.y, lightPos.z);
+		//glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
+		//glUniform3f(diffusePointLightLoc, 0.1f, 0.1f, 0.1f);
+		//glUniform3f(specularPointLightLoc, 0.5f, 0.5f, 0.5f);
+		//glUniform1f(constantPointLightLoc, 1.0f);
+		//glUniform1f(linearPointLightLoc, 0.045f);
+		//glUniform1f(quadraticPointLightLoc, 0.0075f);
+
+		// Set Material Properties
+
+		GLint matAmbientLoc = glGetUniformLocation(HSVShaderProgram, "material.ambient");
+		GLint matDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
+		GLint matSpecularLoc = glGetUniformLocation(HSVShaderProgram, "material.specular");
+		GLint matShineLoc = glGetUniformLocation(HSVShaderProgram, "material.shininess");
+
+		glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
+		glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
+		glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
+		glUniform1f(matShineLoc, 100.0f);
 
 		// Set HSV Properties
 		GLint hueShiftLoc = glGetUniformLocation(HSVShaderProgram, "hueShift");

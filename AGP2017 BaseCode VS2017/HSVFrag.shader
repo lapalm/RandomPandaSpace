@@ -76,37 +76,37 @@ void main() {
 	vec3 result = calcDirLight(dirLight, normal, viewDir);
 
 	//// Phase 2: Point lights
-	//result += calcPointLight(pointLight, norm, FragPos, viewDir);
+	//result += calcPointLight(pointLight, normal, FragPos, viewDir);
 
 	//// Phase 3: Spot light
 
-	//result += calcSpotLight(spotLight, norm, FragPos, viewDir);
+	//result += calcSpotLight(spotLight, normal, FragPos, viewDir);
 
 	// phase 4: emission + hsv
 
 	// sample the image
-	vec3 rgb = vec3(texture(material.emission, ex_UV));
-	
-	//// look up the corresponding hsv value
-	//vec3 hsv = rgb2hsv(rgb);
+	//vec3 rgb = vec3(texture(material.emission, ex_UV));
+	//
+	////// look up the corresponding hsv value
+	////vec3 hsv = rgb2hsv(rgb);
 
-	//// manipulate hue and saturation
-	//hsv.x = fract(hsv.x + hueShift);
-	//hsv.y *= satBoost;
+	////// manipulate hue and saturation
+	////hsv.x = fract(hsv.x + hueShift);
+	////hsv.y *= satBoost;
 
-	// look up the corresponding rgb value
-	//vec3 finalemission = vec3(hsv2rgb(hsv));
+	//// look up the corresponding rgb value
+	////vec3 finalemission = vec3(hsv2rgb(hsv));
 
-	//vec3 emission = finalemission;
-	vec3 emission = rgb;
+	////vec3 emission = finalemission;
+	//vec3 emission = rgb;
 
-	result += emission;
+	//result += emission;
 
 	//phase 5: gamma correct
 	float gammaValue = 2.2;
 
 	if (ex_UV.x < 0.5) {
-		result += pow(result, vec3(gammaValue)); //1.0 / gammaValue));
+		result += pow(result, vec3( gammaValue)); 
 	}
 
 	// Each light type adds it's contribution to the resulting output color until all light sources are processed.
@@ -132,7 +132,7 @@ vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, ex_UV));
 	vec3 specular = light.specular * spec * vec3(texture(material.specular, ex_UV));
 
-	return diffuse + ambient  + specular;//(ambient + diffuse + specular);
+	return (ambient + diffuse + specular);
 
 }
 
