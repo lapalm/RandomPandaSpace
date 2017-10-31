@@ -76,10 +76,9 @@ rt3d::lightStruct light0 = {
 	{-5.0f, 2.0f, 2.0f, 1.0f}  // position
 };
 
-glm::vec4 lightPos(-5.0f, 2.0f, 2.0f, 0.0f); 
-glm::vec4 lightPosition(-5.0f, 2.0f, 2.0f, 0.0f); //light position
+glm::vec4 lightPos(-5.0f, 2.0f, 2.0f, 1.0f); 
 float hueShift = 0.0f; // HSV hue shift
-//glm::vec3 sunPOs(-5.0f, 2.0f, 2.0f, 1.0f); 
+glm::vec4 sunPOs(0.0f, 0.0f, 0.0f, 1.0f); 
 
 rt3d::materialStruct material0 = {
 	{0.4f, 0.4f, 0.4f, 1.0f}, // ambient
@@ -333,63 +332,7 @@ void init(void) {
 	uniformIndex = glGetUniformLocation(reflectrefractShaderProgram, "texture1_skycube");
 	glUniform1i(uniformIndex, 1);
 
-	// HSV ShaderProgram (w/Gamma Correction <--- To be added soon!)
-
 	HSVShaderProgram = rt3d::initShaders("HSVVert.shader", "HSVFrag.shader");
-	/*rt3d::setLight(HSVShaderProgram, light0);
-	rt3d::setMaterial(HSVShaderProgram, material0);*/
-
-	// Don't forget to 'use' the corresponding shader program first (to set the uniform)
-
-	//GLint objectColorLoc = glGetUniformLocation(HSVShaderProgram, "objectColor");
-	//GLint lightColorLoc = glGetUniformLocation(HSVShaderProgram, "lightColor");
-	//GLint lightPosLoc = glGetUniformLocation(HSVShaderProgram, "lightPos");
-	//GLint lightPositionLoc = glGetUniformLocation(HSVShaderProgram, "light.position");
-	
-	//GLint lightAmbientLoc = glGetUniformLocation(HSVShaderProgram, "light.ambient");
-	//GLint lightDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "light.diffuse");
-	//GLint lightSpecularLoc = glGetUniformLocation(HSVShaderProgram, "light.specular");
-	//GLint lightDirPos = glGetUniformLocation(HSVShaderProgram, "light.direction");
-	//GLint lightConstantPos = glGetUniformLocation(HSVShaderProgram, "light.constant");
-	//GLint lightLinearPos = glGetUniformLocation(HSVShaderProgram, "light.linear");
-	//GLint lightQuadraticPos = glGetUniformLocation(HSVShaderProgram, "light.quadratic");
-
-	//GLint lightSpotLoc = glGetUniformLocation(HSVShaderProgram, "light.spotPosition");
-	//GLint lightSpotdirLoc = glGetUniformLocation(HSVShaderProgram, "light.spotDirection");
-	//GLint lightSpotCutOffLoc = glGetUniformLocation(HSVShaderProgram, "light.cutOff");
-	//GLint lightSpotOuterCutOffLoc = glGetUniformLocation(HSVShaderProgram, "light.outerCutOff");
-
-
-
-	/*uniformIndex = glGetUniformLocation(HSVShaderProgram, "dirLight.direction");
-	glUniform1f(uniformIndex, )*/
-
-
-
-	//glUniform3f(objectColorLoc, color.x, color.y, color.z);
-	//glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f); // Also set light's color (white)
-	//glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-	
-
-	
-	
-
-	// Set Light Properties
-	//glUniform3f(lightAmbientLoc, 0.2f, 0.2f, 0.2f);
-	//glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f); // Darken the light a bit to fit the scene
-	//glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
-	//glUniform3f(lightDirPos, lightPos.x, lightPos.y, lightPos.z);
-	//cout << "X: " << lightPos.x << " Y: " << lightPos.y <<" Z: " <<lightPos.z << endl;
-	//glUniform3f(lightPositionLoc, lightPos.x, lightPos.y, lightPos.z);
-
-
-	// Set Spotlight Properties
-	//(Removed)
-
-
-
-
-
 	textureProgram = rt3d::initShaders("textured.vert", "textured.frag");
 	skyboxProgram = rt3d::initShaders("cubeMap.vert", "cubeMap.frag");
 	HSVShaderProgram = rt3d::initShaders("HSVVert.shader", "HSVFrag.shader");
@@ -415,29 +358,13 @@ void init(void) {
 	
 	meshObjects[0] = rt3d::createMesh(verts.size() / 3, verts.data(), nullptr, norms.data(), tex_coords.data(), meshIndexCount, indices.data());
 	
-	// Checking for normals
-	/*for (int i = 0; i < norms.size(); i++) {
-		cout << norms[i] << endl;
-	}*/
-	
 	meshObjects[1] = tmpModel.ReadMD2Model("tris.MD2");
 	md2VertCount = tmpModel.getVertDataCount();
-
-
-	verts.clear(); norms.clear(); tex_coords.clear(); indices.clear();
-	rt3d::loadObj("bunny-5000.obj", verts, norms, tex_coords, indices);
-	toonIndexCount = indices.size();
-	meshObjects[2] = rt3d::createMesh(verts.size() / 3, verts.data(), nullptr, norms.data(), nullptr, toonIndexCount, indices.data());
-
-	verts.clear(); norms.clear(); tex_coords.clear(); indices.clear();
-	rt3d::loadObj("statue.obj", verts, norms, tex_coords, indices);
-	statueIndexCount = indices.size();
-	meshObjects[3] = rt3d::createMesh(verts.size() / 3, verts.data(), nullptr, norms.data(), nullptr, statueIndexCount, indices.data());
 
 	verts.clear(); norms.clear(); tex_coords.clear(); indices.clear();
 	rt3d::loadObj("ground2.obj", verts, norms, tex_coords, indices);
 	groundIndexCount = indices.size();
-	meshObjects[4] = rt3d::createMesh(verts.size() / 3, verts.data(), nullptr, norms.data(), tex_coords.data(), groundIndexCount, indices.data());
+	meshObjects[2] = rt3d::createMesh(verts.size() / 3, verts.data(), nullptr, norms.data(), tex_coords.data(), groundIndexCount, indices.data());
 
 	// Textures:
 	textures[0] = loadBitmap("concrete.bmp");
@@ -704,23 +631,10 @@ void draw(SDL_Window * window) {
 		rt3d::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
 		rt3d::setMaterial(shaderProgram, material0);
 		rt3d::setLightPos(shaderProgram, glm::value_ptr(tmp));
-		rt3d::drawIndexedMesh(meshObjects[4], groundIndexCount, GL_TRIANGLES);
+		rt3d::drawIndexedMesh(meshObjects[2], groundIndexCount, GL_TRIANGLES);
 		glBindTexture(GL_TEXTURE_2D, 0);	// unbind the texture
 		mvStack.pop();
 		glEnable(GL_CULL_FACE);
-
-		// draw the toon shaded bunny
-		glUseProgram(toonShaderProgram);
-		rt3d::setUniformMatrix4fv(toonShaderProgram, "projection", glm::value_ptr(projection));
-		mvStack.push(mvStack.top());
-		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-8.0f, 0.0f, -2.0f));
-		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(10.0f, 10.0f, 10.0f));
-		rt3d::setUniformMatrix4fv(toonShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-		rt3d::setLight(toonShaderProgram, light0);
-		rt3d::setLightPos(toonShaderProgram, glm::value_ptr(tmp));
-		rt3d::setUniformMatrix3fv(toonShaderProgram, "normalmatrix", glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(mvStack.top())))));
-		rt3d::drawIndexedMesh(meshObjects[2], toonIndexCount, GL_TRIANGLES);
-		mvStack.pop();
 
 		// draw a rotating cube to be environment/reflection mapped
 		glUseProgram(envmapProgram);
@@ -766,48 +680,35 @@ void draw(SDL_Window * window) {
 		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
 		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelMatrix", glm::value_ptr(modelMatrix));
 
-		// Set Directional Light Properties for multi-light
-
-		// Multi-light - dirLight
-		GLint dirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.direction");
-		GLint ambientDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.ambient");
-		GLint diffuseDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.diffuse");
-		GLint specularDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.specular");
-
+		
 		GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
 		glUniform3fv(viewPosLoc, 1, glm::value_ptr(eye)); 
 
-		//glUniform3f(dirLightLoc, sunPos.x, sunPos.y, sunPos.z); <---- Fix back to sun after debug from lightPos.
-		glUniform3f(dirLightLoc, tmp.x, tmp.y, tmp.z);
-		glUniform3f(ambientDirLightLoc, 0.05f, 0.05f, 0.05f);
-		glUniform3f(diffuseDirLightLoc, 0.05f, 0.05f, 0.05f); // Darken the light a bit to fit the scene
-		glUniform3f(specularDirLightLoc, 0.1f, 0.1f, 0.1f);
-
-		//// Multi-light - pointLight
-		//GLint pointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.direction");
-		//GLint ambientPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.ambient");
-		//GLint diffusePointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.diffuse");
-		//GLint specularPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.specular");
-		//GLint constantPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.constant");
-		//GLint linearPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.linear");
-		//GLint quadraticPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.quadratic");
+		// Multi-light - pointLight
+		GLint pointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.direction");
+		GLint ambientPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.ambient");
+		GLint diffusePointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.diffuse");
+		GLint specularPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.specular");
+		GLint constantPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.constant");
+		GLint linearPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.linear");
+		GLint quadraticPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.quadratic");
 
 
-		//// Set Light attenuation properties <- See for value reference: http://www.ogre3d.org/tikiwiki/tiki-index.php?page=-Point+Light+Attenuation
-		//// These values are for attenuation distance: 50
-		////glUniform1f(lightConstantPos, 1.0f); 
-		////glUniform1f(lightLinearPos, 0.022f);
-		////glUniform1f(lightQuadraticPos, 0.0019f);
+		// Set Light attenuation properties <- See for value reference: http://www.ogre3d.org/tikiwiki/tiki-index.php?page=-Point+Light+Attenuation
+		// These values are for attenuation distance: 50
+		//glUniform1f(lightConstantPos, 1.0f); 
+		//glUniform1f(lightLinearPos, 0.022f);
+		//glUniform1f(lightQuadraticPos, 0.0019f);
 
 
-		//// Set Point Light Properties for multi-light
-		//glUniform3f(pointLightLoc, lightPos.x, lightPos.y, lightPos.z);
-		//glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
-		//glUniform3f(diffusePointLightLoc, 0.1f, 0.1f, 0.1f);
-		//glUniform3f(specularPointLightLoc, 0.5f, 0.5f, 0.5f);
-		//glUniform1f(constantPointLightLoc, 1.0f);
-		//glUniform1f(linearPointLightLoc, 0.045f);
-		//glUniform1f(quadraticPointLightLoc, 0.0075f);
+		// Set Point Light Properties for multi-light
+		glUniform3f(pointLightLoc, tmp.x, tmp.y, tmp.z);
+		glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
+		glUniform3f(diffusePointLightLoc, 0.1f, 0.1f, 0.1f);
+		glUniform3f(specularPointLightLoc, 0.5f, 0.5f, 0.5f);
+		glUniform1f(constantPointLightLoc, 1.0f);
+		glUniform1f(linearPointLightLoc, 0.045f);
+		glUniform1f(quadraticPointLightLoc, 0.0075f);
 
 		// Set Material Properties
 
@@ -819,7 +720,7 @@ void draw(SDL_Window * window) {
 		glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
 		glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
 		glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
-		glUniform1f(matShineLoc, 100.0f);
+		glUniform1f(matShineLoc, 32.0f);
 
 		// Set HSV Properties
 		GLint hueShiftLoc = glGetUniformLocation(HSVShaderProgram, "hueShift");
