@@ -30,6 +30,10 @@ uniform vec3 viewPos; // Currently replaced by ex_L
 uniform PointLight pointLight;
 uniform Material material;
 
+uniform float attConst;
+uniform float attLinear;
+uniform float attQuadratic;
+
 uniform float hueShift;
 uniform float satBoost;
 
@@ -47,30 +51,30 @@ void main() {
 	// Phase 1: Point lights
 	vec3 result = calcPointLight(pointLight, normal, FragPos, viewDir);
 
-	//// phase 2: emission + hsv
+	// phase 2: emission + hsv
 
-	//// sample the image
-	//vec3 rgb = vec3(texture(material.emission, ex_UV));
-	//
-	//// look up the corresponding hsv value
-	//vec3 hsv = rgb2hsv(rgb);
+	// sample the image
+	vec3 rgb = vec3(texture(material.emission, ex_UV));
+	
+	// look up the corresponding hsv value
+	vec3 hsv = rgb2hsv(rgb);
 
-	//// manipulate hue and saturation
-	//hsv.x = fract(hsv.x + hueShift);
-	//hsv.y *= satBoost;
+	// manipulate hue and saturation
+	hsv.x = fract(hsv.x + hueShift);
+	hsv.y *= satBoost;
 
-	//// look up the corresponding rgb value
-	//vec3 finalemission = vec3(hsv2rgb(hsv));
+	// look up the corresponding rgb value
+	vec3 finalemission = vec3(hsv2rgb(hsv));
 
-	//vec3 emission = finalemission;
+	vec3 emission = finalemission;
 
-	//result += emission;
+	result += emission;
 
 	//phase 3: gamma correct
 	float gammaValue = 2.2;
 
 	if (ex_UV.x < 0.5) {
-		result += pow(result, vec3( gammaValue)); 
+		result += pow(result, vec3(1/ gammaValue)); 
 	}
 
 	//phase 4: Output Result
@@ -83,7 +87,7 @@ void main() {
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
 
-	vec3 lightDir = normalize(light.position - FragPos); // Normalize the resulting direction vector
+	vec3 lightDir = normalize(light.position.xyz - FragPos.xyz); // Normalize the resulting direction vector
 
 	// Diffuse
 	float diff = max(dot(normal, lightDir), 0.0); // Use Max to avoid dot product going negative when vector is greater than 90 degrees.
@@ -94,6 +98,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
 
 	// Attenuation
 	float distance = length(light.position - FragPos);
+
 	float attenuation = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
 	// Combine results
@@ -108,6 +113,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
 	return (ambient + diffuse + specular);
 }
 
+/*Reference: From Sam from Lolengine.net*/
 vec3 rgb2hsv(vec3 rgbColor)
 {
 	vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -119,6 +125,7 @@ vec3 rgb2hsv(vec3 rgbColor)
 	return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
 
+/*Reference: From Sam from Lolengine.net*/
 vec3 hsv2rgb(vec3 hsvColor)
 {
 	vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);

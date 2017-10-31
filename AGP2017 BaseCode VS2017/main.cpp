@@ -332,6 +332,16 @@ void init(void) {
 	uniformIndex = glGetUniformLocation(reflectrefractShaderProgram, "texture1_skycube");
 	glUniform1i(uniformIndex, 1);
 
+	rt3d::setLight(HSVShaderProgram, light0);
+	rt3d::setMaterial(HSVShaderProgram, material1);
+	// set light attenuation shader uniforms
+	uniformIndex = glGetUniformLocation(HSVShaderProgram, "attConst");
+	glUniform1f(uniformIndex, attConstant);
+	uniformIndex = glGetUniformLocation(HSVShaderProgram, "attLinear");
+	glUniform1f(uniformIndex, attLinear);
+	uniformIndex = glGetUniformLocation(HSVShaderProgram, "attQuadratic");
+	glUniform1f(uniformIndex, attQuadratic);
+
 	HSVShaderProgram = rt3d::initShaders("HSVVert.shader", "HSVFrag.shader");
 	textureProgram = rt3d::initShaders("textured.vert", "textured.frag");
 	skyboxProgram = rt3d::initShaders("cubeMap.vert", "cubeMap.frag");
@@ -411,17 +421,8 @@ void init(void) {
 		std::cout << "FBO attachments unsupported" << std::endl;
 
 
-
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	
-	/*
-	GL_FRAMEBUFFER_SRGB:
-	Tell OpenGL that each subsequent drawing commands should first gamma correct colors from the sRGB color space before storing them in color buffer(s).
-	sRGB is the color space, which roughly corresponds to a gamma of 2,2 and a standard for most home devices.
-	*/
-	//glEnable(GL_FRAMEBUFFER_SRGB); //<----- Done in HSVFrag.shader instead
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
@@ -474,6 +475,21 @@ void update(void) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_CULL_FACE);
 	}
+
+	/*
+	GL_FRAMEBUFFER_SRGB:
+	Tell OpenGL that each subsequent drawing commands should first gamma correct colors from the sRGB color space before storing them in color buffer(s).
+	sRGB is the color space, which roughly corresponds to a gamma of 2,2 and a standard for most home devices.
+	*/
+
+	if (keys[SDL_SCANCODE_3]) {
+		glEnable(GL_FRAMEBUFFER_SRGB); 
+	}
+
+	if (keys[SDL_SCANCODE_4]) {
+		glDisable(GL_FRAMEBUFFER_SRGB);
+	}
+
 	if (keys[SDL_SCANCODE_Z]) {
 		if (--currentAnim < 0) currentAnim = 19;
 		cout << "Current animation: " << currentAnim << endl;
@@ -677,12 +693,13 @@ void draw(SDL_Window * window) {
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
 		mvStack.top() = mvStack.top() * modelMatrix;
+		modelMatrix = glm::mat4(1.0);
 		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
 		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelMatrix", glm::value_ptr(modelMatrix));
 
 		
 		GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
-		glUniform3fv(viewPosLoc, 1, glm::value_ptr(eye)); 
+		glUniform3f(viewPosLoc, light0.position[0], light0.position[1], light0.position[2]);
 
 		// Multi-light - pointLight
 		GLint pointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.direction");
@@ -702,12 +719,13 @@ void draw(SDL_Window * window) {
 
 
 		// Set Point Light Properties for multi-light
-		glUniform3f(pointLightLoc, tmp.x, tmp.y, tmp.z);
+		glUniform3f(pointLightLoc, light0.position[0], light0.position[1], light0.position[2]);
+		cout << light0.position[0] << endl;
 		glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
 		glUniform3f(diffusePointLightLoc, 0.8f, 0.8f, 0.8f);
 		glUniform3f(specularPointLightLoc, 1.0f, 1.0f, 1.0f);
 		glUniform1f(constantPointLightLoc, 1.0f);
-		glUniform1f(linearPointLightLoc, 0.09f);
+		glUniform1f(linearPointLightLoc, 0.09f);//0.09f);
 		glUniform1f(quadraticPointLightLoc, 0.032);
 
 		// Set Material Properties
@@ -720,7 +738,7 @@ void draw(SDL_Window * window) {
 		glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
 		glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
 		glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
-		glUniform1f(matShineLoc, 32.0f);
+		glUniform1f(matShineLoc, 1.0f);
 
 		// Set HSV Properties
 		GLint hueShiftLoc = glGetUniformLocation(HSVShaderProgram, "hueShift");
@@ -777,6 +795,7 @@ void draw(SDL_Window * window) {
 }
 
 
+
 // Program entry point - SDL manages the actual WinMain entry point for us
 int main(int argc, char *argv[]) {
 	SDL_Window * hWindow; // window handle
@@ -804,6 +823,7 @@ int main(int argc, char *argv[]) {
 		update();
 		draw(hWindow); // call the draw function
 		hueShift += 0.0005f;
+		
 	}
 
 	SDL_GL_DeleteContext(glContext);
