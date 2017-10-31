@@ -67,4 +67,5 @@ void main(void) {
 		
 	out_Color=min(litColour+amb*texture(textureUnit0, ex_TexCoord)*texture(textureUnit1, reflectTexCoord),vec4(1.0f));//Here attenuation does not affectambient
 
+
 }

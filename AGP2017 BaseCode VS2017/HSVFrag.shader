@@ -44,15 +44,8 @@ struct SpotLight {
 
 
 in vec3 FragPos; // VertexPosition
-in vec3 normal; // WorldNormals <-- Normalized in vertex shader
+in vec3 ex_Normal; // WorldNormals <-- Normalized in vertex shader
 in vec2 ex_UV; // ex_TexCoords
-
-in vec3 ex_V;
-in vec3 ex_L;
-
-in vec3 ex_WorldNorm;
-in vec3 ex_WorldView;
-
 
 layout(location = 0) out vec4 out_color; //The result to be outputted
 
@@ -76,12 +69,11 @@ vec3 hsv2rgb(vec3 hsvColor);
 void main() {
 
 	// Properties
-	vec3 norm = normalize(normal);
+	vec3 normal = normalize(ex_Normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
-	//vec3 viewDir = normalize(ex_L);
 
 	// Phase 1: Directional Lighting
-	vec3 result = calcDirLight(dirLight, norm, viewDir);
+	vec3 result = calcDirLight(dirLight, normal, viewDir);
 
 	//// Phase 2: Point lights
 	//result += calcPointLight(pointLight, norm, FragPos, viewDir);
@@ -90,27 +82,32 @@ void main() {
 
 	//result += calcSpotLight(spotLight, norm, FragPos, viewDir);
 
-	//// Phase 4: Emission + HSV
+	// phase 4: emission + hsv
 
-	//// Sample the image
-	//vec3 rgb = vec3(texture(material.emission, ex_UV));
-
-	//// Look up the corresponding HSV value
+	// sample the image
+	vec3 rgb = vec3(texture(material.emission, ex_UV));
+	
+	//// look up the corresponding hsv value
 	//vec3 hsv = rgb2hsv(rgb);
 
-	//// Manipulate hue and saturation
+	//// manipulate hue and saturation
 	//hsv.x = fract(hsv.x + hueShift);
 	//hsv.y *= satBoost;
 
-	//// Look up the corresponding RGB value
-	//vec3 finalEmission = vec3(hsv2rgb(hsv));
+	// look up the corresponding rgb value
+	//vec3 finalemission = vec3(hsv2rgb(hsv));
 
-	//vec3 emission = finalEmission;
+	//vec3 emission = finalemission;
+	vec3 emission = rgb;
 
-	//result += emission;
+	result += emission;
 
-	// Phase 5: Gamma Correct
-	//result += pow(result, vec3(1.0 / 2.2));
+	//phase 5: gamma correct
+	float gammaValue = 2.2;
+
+	if (ex_UV.x < 0.5) {
+		result += pow(result, vec3(gammaValue)); //1.0 / gammaValue));
+	}
 
 	// Each light type adds it's contribution to the resulting output color until all light sources are processed.
 	// The resulting color contains the color impact of all the light sources in the scene combined. 
@@ -126,15 +123,8 @@ vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 
 	// Diffuse
 	float diff = max(dot(normal, lightDir), 0.0); // Use Max to avoid dot product going negative when vector is greater than 90 degrees.
-
-	// Specular 
-	// Calculate R - reflection of light
 	
-	// Pablo's method
-	vec3 R = normalize(reflect(normalize(-ex_L), normalize(normal)));
-	//float spec = pow(max(dot(ex_V, R), 0.0), material.shininess);
-	
-	vec3 reflectDir = reflect(lightDir, normal);
+	vec3 reflectDir = reflect(-lightDir, normal);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
 	// Combine results
@@ -142,7 +132,7 @@ vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, ex_UV));
 	vec3 specular = light.specular * spec * vec3(texture(material.specular, ex_UV));
 
-	return (ambient + diffuse + specular);
+	return diffuse + ambient  + specular;//(ambient + diffuse + specular);
 
 }
 

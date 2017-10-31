@@ -344,8 +344,7 @@ void init(void) {
 	//GLint lightColorLoc = glGetUniformLocation(HSVShaderProgram, "lightColor");
 	//GLint lightPosLoc = glGetUniformLocation(HSVShaderProgram, "lightPos");
 	//GLint lightPositionLoc = glGetUniformLocation(HSVShaderProgram, "light.position");
-	GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
-
+	
 	//GLint lightAmbientLoc = glGetUniformLocation(HSVShaderProgram, "light.ambient");
 	//GLint lightDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "light.diffuse");
 	//GLint lightSpecularLoc = glGetUniformLocation(HSVShaderProgram, "light.specular");
@@ -376,8 +375,9 @@ void init(void) {
 	//glUniform3f(objectColorLoc, color.x, color.y, color.z);
 	//glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f); // Also set light's color (white)
 	//glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-	glUniform3f(viewPosLoc, lightPos.x, lightPos.y, lightPos.z); // Used to be eye
+	
 
+	
 	
 
 	// Set Light Properties
@@ -398,7 +398,7 @@ void init(void) {
 	glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
 	glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
 	glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
-	glUniform1f(matShineLoc, 100.0f);
+	glUniform1f(matShineLoc, 32.0f);
 
 	// Set Light attenuation properties <- See for value reference: http://www.ogre3d.org/tikiwiki/tiki-index.php?page=-Point+Light+Attenuation
 	// These values are for attenuation distance: 50
@@ -408,16 +408,19 @@ void init(void) {
 
 
 	// Set Point Light Properties for multi-light
-	glUniform3f(pointLightLoc, lightPos.x, lightPos.y, lightPos.z);
-	glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
-	glUniform3f(diffusePointLightLoc, 0.1f, 0.1f, 0.1f);
-	glUniform3f(specularPointLightLoc, 0.5f, 0.5f, 0.5f);
-	glUniform1f(constantPointLightLoc, 1.0f);
-	glUniform1f(linearPointLightLoc, 0.045f);
-	glUniform1f(quadraticPointLightLoc, 0.0075f);
+	//glUniform3f(pointLightLoc, lightPos.x, lightPos.y, lightPos.z);
+	//glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
+	//glUniform3f(diffusePointLightLoc, 0.1f, 0.1f, 0.1f);
+	//glUniform3f(specularPointLightLoc, 0.5f, 0.5f, 0.5f);
+	//glUniform1f(constantPointLightLoc, 1.0f);
+	//glUniform1f(linearPointLightLoc, 0.045f);
+	//glUniform1f(quadraticPointLightLoc, 0.0075f);
 
 	// Set Spotlight Properties
 	//(Removed)
+
+
+
 
 
 	textureProgram = rt3d::initShaders("textured.vert", "textured.frag");
@@ -473,7 +476,7 @@ void init(void) {
 	textures[0] = loadBitmap("concrete.bmp");
 	textures[1] = loadBitmap("hobgoblin2.bmp");
 	textures[2] = loadBitmap("studdedmetal.bmp");
-	textures[3] = loadBitmap("lavaTexture.bmp");
+	textures[3] = loadBitmap("lavaSplash.bmp");
 	textures[4] = loadBitmap("container2.bmp");
 	textures[5] = loadBitmap("container2_specular.bmp");
 
@@ -524,7 +527,7 @@ void init(void) {
 	Tell OpenGL that each subsequent drawing commands should first gamma correct colors from the sRGB color space before storing them in color buffer(s).
 	sRGB is the color space, which roughly corresponds to a gamma of 2,2 and a standard for most home devices.
 	*/
-	glEnable(GL_FRAMEBUFFER_SRGB); //<----- Done in HSVFrag.shader instead
+	//glEnable(GL_FRAMEBUFFER_SRGB); //<----- Done in HSVFrag.shader instead
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
@@ -590,9 +593,7 @@ void update(void) {
 
 void draw(SDL_Window * window) {
 
-	unsigned int diffuseMap = textures[4];
-	unsigned int specularMap = textures[5];
-	unsigned int emissionMap = textures[3];
+	
 
 	// clear the screen
 	glEnable(GL_CULL_FACE);
@@ -611,7 +612,7 @@ void draw(SDL_Window * window) {
 	// first reflection to FBO
 	// then scene with reflection on a quad
 	for (int pass = 0; pass < 2; pass++) {
-
+		glBindTexture(GL_TEXTURE_2D, 0);	// unbind the texture		
 		// 'eye' is the world position of the camera will use this later
 		at = moveForward(eye, r, 1.0f);
 
@@ -728,6 +729,7 @@ void draw(SDL_Window * window) {
 		glUseProgram(shaderProgram);
 		rt3d::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));
 		rt3d::setLightPos(shaderProgram, glm::value_ptr(tmp));
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textures[0]); // concrete texture
 		mvStack.push(mvStack.top());
 		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-5.0f, 0.0f, -5.0f));
@@ -736,6 +738,7 @@ void draw(SDL_Window * window) {
 		rt3d::setMaterial(shaderProgram, material0);
 		rt3d::setLightPos(shaderProgram, glm::value_ptr(tmp));
 		rt3d::drawIndexedMesh(meshObjects[4], groundIndexCount, GL_TRIANGLES);
+		glBindTexture(GL_TEXTURE_2D, 0);	// unbind the texture
 		mvStack.pop();
 		glEnable(GL_CULL_FACE);
 
@@ -751,30 +754,6 @@ void draw(SDL_Window * window) {
 		rt3d::setUniformMatrix3fv(toonShaderProgram, "normalmatrix", glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(mvStack.top())))));
 		rt3d::drawIndexedMesh(meshObjects[2], toonIndexCount, GL_TRIANGLES);
 		mvStack.pop();
-
-		// draw the statue with mixed reflection and refraction
-		glUseProgram(reflectrefractShaderProgram);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, skybox[0]);
-		rt3d::setUniformMatrix4fv(reflectrefractShaderProgram, "projection", glm::value_ptr(projection));
-		theta_refxct += 0.5f;
-		glm::mat4 modelMatrix_refxct(1.0);
-		mvStack.push(mvStack.top());
-		modelMatrix_refxct = glm::translate(modelMatrix_refxct, glm::vec3(-5.0f, 0.0f, -3.0f));
-		modelMatrix_refxct = glm::rotate(modelMatrix_refxct, float(theta*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelMatrix_refxct = glm::scale(modelMatrix_refxct, glm::vec3(1.0f, 1.0f, 1.0f));
-		mvStack.top() = mvStack.top() * modelMatrix_refxct;
-		rt3d::setUniformMatrix4fv(reflectrefractShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-		rt3d::setUniformMatrix4fv(reflectrefractShaderProgram, "modelMatrix", glm::value_ptr(modelMatrix_refxct));
-
-		rt3d::setLight(reflectrefractShaderProgram, light0);
-		rt3d::setLightPos(reflectrefractShaderProgram, glm::value_ptr(tmp));
-		rt3d::setUniformMatrix3fv(reflectrefractShaderProgram, "normalmatrix", glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(mvStack.top())))));
-		GLuint uniformIndex = glGetUniformLocation(reflectrefractShaderProgram, "cameraPos");
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(eye));
-		rt3d::drawIndexedMesh(meshObjects[3], statueIndexCount, GL_TRIANGLES);
-		mvStack.pop();
-
 
 		// draw a rotating cube to be environment/reflection mapped
 		glUseProgram(envmapProgram);
@@ -797,11 +776,11 @@ void draw(SDL_Window * window) {
 		mvStack.top() = mvStack.top() * modelMatrix;
 		rt3d::setUniformMatrix4fv(envmapProgram, "modelview", glm::value_ptr(mvStack.top()));
 		rt3d::setUniformMatrix4fv(envmapProgram, "modelMatrix", glm::value_ptr(modelMatrix));
-		uniformIndex = glGetUniformLocation(envmapProgram, "cameraPos");
+		GLuint uniformIndex = glGetUniformLocation(envmapProgram, "cameraPos");
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(eye));
 		rt3d::setMaterial(envmapProgram, material1);
 		rt3d::drawIndexedMesh(meshObjects[0], meshIndexCount, GL_TRIANGLES);
-
+		glBindTexture(GL_TEXTURE_2D, 0);	// unbind the texture
 		// remember to use at least one pop operation per push...
 		mvStack.pop(); // initial matrix
 		
@@ -809,8 +788,16 @@ void draw(SDL_Window * window) {
 		// Draw cube using HSV Shader
 		glUseProgram(HSVShaderProgram);
 		rt3d::setLightPos(HSVShaderProgram, glm::value_ptr(tmp));
-		rt3d::setUniformMatrix4fv(HSVShaderProgram, "projection", glm::value_ptr(projection));
+		rt3d::setUniformMatrix4fv(HSVShaderProgram, "projection", glm::value_ptr(projection)); // projection
 
+		modelMatrix = glm::mat4(1.0); // model
+		mvStack.push(mvStack.top()); // view
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 2.5f, -1.0f));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+
+		mvStack.top() = mvStack.top() * modelMatrix;
+		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
+		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelMatrix", glm::value_ptr(modelMatrix));
 
 		// Set Directional Light Properties for multi-light
 
@@ -820,33 +807,14 @@ void draw(SDL_Window * window) {
 		GLint diffuseDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.diffuse");
 		GLint specularDirLightLoc = glGetUniformLocation(HSVShaderProgram, "dirLight.specular");
 
+		GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
+		glUniform3fv(viewPosLoc, 1, glm::value_ptr(eye)); 
+
 		//glUniform3f(dirLightLoc, sunPos.x, sunPos.y, sunPos.z); <---- Fix back to sun after debug from lightPos.
 		glUniform3f(dirLightLoc, lightPos.x, lightPos.y, lightPos.z);
 		glUniform3f(ambientDirLightLoc, 0.05f, 0.05f, 0.05f);
-		glUniform3f(diffuseDirLightLoc,  0.05f, 0.05f, 0.05f); // Darken the light a bit to fit the scene
+		glUniform3f(diffuseDirLightLoc, 0.05f, 0.05f, 0.05f); // Darken the light a bit to fit the scene
 		glUniform3f(specularDirLightLoc, 0.1f, 0.1f, 0.1f);
-
-
-
-		// Now bind textures to texture units
-
-		// bind diffuse map
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap);
-		GLint diffuseLocation = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
-		glUniform1i(diffuseLocation, 0);
-
-		// bind specular map
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);
-		GLint specularLocation = glGetUniformLocation(HSVShaderProgram, "material.specular");
-		glUniform1i(specularLocation, 1);
-
-		// bind emission map
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, emissionMap);
-		GLint emissionLocation = glGetUniformLocation(HSVShaderProgram, "material.emission");
-		glUniform1i(emissionLocation, 2);
 
 		// Set HSV Properties
 		GLint hueShiftLoc = glGetUniformLocation(HSVShaderProgram, "hueShift");
@@ -855,24 +823,37 @@ void draw(SDL_Window * window) {
 		glUniform3f(ourImageLoc, 1.0f, 1.0f, 0.0f);
 		glUniform1f(satBoostLoc, 1.0f);
 		glUniform1f(hueShiftLoc, hueShift);
-		
 
-		modelMatrix = glm::mat4(1.0);
-		mvStack.push(mvStack.top());
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 2.5f, -1.0f));
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
-		mvStack.top() = mvStack.top() * modelMatrix;
-		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelMatrix", glm::value_ptr(modelMatrix));
+		// Now bind textures to texture units
 
-		rt3d::setUniformMatrix3fv(HSVShaderProgram, "normalmatrix", glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(mvStack.top())))));
-		uniformIndex = glGetUniformLocation(HSVShaderProgram, "cameraPos");
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(eye));
+		unsigned int emissionMap = textures[3];
+		unsigned int diffuseMap = textures[4];
+		unsigned int specularMap = textures[5];
 
-		//glUniform3fv(uniformIndex, 1, glm::value_ptr(eye));
-		//rt3d::setMaterial(HSVShaderProgram, material1);
+		GLint diffuseLocation = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
+		glUniform1i(diffuseLocation, 0);
+		GLint specularLocation = glGetUniformLocation(HSVShaderProgram, "material.specular");
+		glUniform1i(specularLocation, 1);
+		GLint emissionLocation = glGetUniformLocation(HSVShaderProgram, "material.emission");
+		glUniform1i(emissionLocation, 2);
+
+		// bind diffuse map
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+		// bind specular map
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+
+		// bind emission map
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, emissionMap);
+
 		rt3d::drawIndexedMesh(meshObjects[0], meshIndexCount, GL_TRIANGLES);
+
+
+		glBindTexture(GL_TEXTURE_2D, 0);	// unbind the texture
 
 		// remember to use at least one pop operation per push...
 		mvStack.pop(); // initial matrix
@@ -916,7 +897,7 @@ int main(int argc, char *argv[]) {
 		}
 		update();
 		draw(hWindow); // call the draw function
-		hueShift += 0.005f;
+		hueShift += 0.0005f;
 	}
 
 	SDL_GL_DeleteContext(glContext);
