@@ -688,7 +688,7 @@ void draw(SDL_Window * window) {
 		rt3d::setUniformMatrix4fv(HSVShaderProgram, "projection", glm::value_ptr(projection)); // projection
 
 		modelMatrix = glm::mat4(1.0); // model
-		mvStack.push(mvStack.top()); // view
+		mvStack.push(mvStack.top()); // modelView Matrix
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 2.5f, -1.0f));
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
@@ -700,6 +700,7 @@ void draw(SDL_Window * window) {
 		
 		GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
 		glUniform3f(viewPosLoc, light0.position[0], light0.position[1], light0.position[2]);
+		//glUniform3f(viewPosLoc, eye.x, eye.y, eye.z);
 
 		// Multi-light - pointLight
 		GLint pointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.direction");

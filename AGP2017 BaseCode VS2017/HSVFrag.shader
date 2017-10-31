@@ -46,7 +46,8 @@ void main() {
 
 	// Properties
 	vec3 normal = normalize(ex_Normal);
-	vec3 viewDir = normalize(viewPos - FragPos);
+	//vec3 viewDir = normalize(viewPos - FragPos);
+	vec3 viewDir = normalize(-FragPos).xyz;
 
 	// Phase 1: Point lights
 	vec3 result = calcPointLight(pointLight, normal, FragPos, viewDir);
@@ -87,19 +88,21 @@ void main() {
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
 
-	vec3 lightDir = normalize(light.position.xyz - FragPos.xyz); // Normalize the resulting direction vector
+	vec3 lightDir = normalize(light.position.xyz - FragPos.xyz); // Normalize the resulting direction vector (ex_L)
 
 	// Diffuse
 	float diff = max(dot(normal, lightDir), 0.0); // Use Max to avoid dot product going negative when vector is greater than 90 degrees.
 
 	// Specular 
-	vec3 reflectDir = reflect(-lightDir, normal);
+	// Calculate - Reflect of light
+	vec3 reflectDir = reflect(-lightDir, normal); // R
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
 	// Attenuation
-	float distance = length(light.position - FragPos);
+	float Distance = length(light.position - FragPos);
+	//float Distance = distance(FragPos, light.position);
 
-	float attenuation = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+	float attenuation = 1.0f / (light.constant + light.linear * Distance + light.quadratic * (Distance * Distance));
 
 	// Combine results
 	vec3 ambient = light.ambient * vec3(texture(material.diffuse, ex_UV));
