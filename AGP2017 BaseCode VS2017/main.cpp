@@ -703,7 +703,7 @@ void draw(SDL_Window * window) {
 		//glUniform3f(viewPosLoc, eye.x, eye.y, eye.z);
 
 		// Multi-light - pointLight
-		GLint pointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.direction");
+		GLint pointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.position");
 		GLint ambientPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.ambient");
 		GLint diffusePointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.diffuse");
 		GLint specularPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.specular");
@@ -731,12 +731,10 @@ void draw(SDL_Window * window) {
 
 		// Set Material Properties
 
-		GLint matAmbientLoc = glGetUniformLocation(HSVShaderProgram, "material.ambient");
-		GLint matDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
-		GLint matSpecularLoc = glGetUniformLocation(HSVShaderProgram, "material.specular");
+		GLint matDiffuseLoc = glGetUniformLocation(HSVShaderProgram, "diffuse");
+		GLint matSpecularLoc = glGetUniformLocation(HSVShaderProgram, "specular");
 		GLint matShineLoc = glGetUniformLocation(HSVShaderProgram, "material.shininess");
 
-		glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
 		glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
 		glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
 		glUniform1f(matShineLoc, 1.0f);
@@ -756,11 +754,11 @@ void draw(SDL_Window * window) {
 		unsigned int diffuseMap = textures[4];
 		unsigned int specularMap = textures[5];
 
-		GLint diffuseLocation = glGetUniformLocation(HSVShaderProgram, "material.diffuse");
+		GLint diffuseLocation = glGetUniformLocation(HSVShaderProgram, "diffuse");
 		glUniform1i(diffuseLocation, 0);
-		GLint specularLocation = glGetUniformLocation(HSVShaderProgram, "material.specular");
+		GLint specularLocation = glGetUniformLocation(HSVShaderProgram, "specular");
 		glUniform1i(specularLocation, 1);
-		GLint emissionLocation = glGetUniformLocation(HSVShaderProgram, "material.emission");
+		GLint emissionLocation = glGetUniformLocation(HSVShaderProgram, "emission");
 		glUniform1i(emissionLocation, 2);
 
 		// bind diffuse map

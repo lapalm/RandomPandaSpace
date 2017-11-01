@@ -1,9 +1,7 @@
 #version 330 core
 
 struct Material {
-	sampler2D diffuse;
-	sampler2D specular;
-	sampler2D emission;
+	
 	float shininess;
 };
 
@@ -37,6 +35,10 @@ uniform float attQuadratic;
 uniform float hueShift;
 uniform float satBoost;
 
+uniform sampler2D diffuse;
+uniform sampler2D specular;
+uniform sampler2D emission;
+
 // Function prototypes
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
 vec3 rgb2hsv(vec3 rgbColor);
@@ -55,7 +57,7 @@ void main() {
 	// phase 2: emission + hsv
 
 	// sample the image
-	vec3 rgb = vec3(texture(material.emission, ex_UV));
+	vec3 rgb = vec3(texture(emission, ex_UV));
 	
 	// look up the corresponding hsv value
 	vec3 hsv = rgb2hsv(rgb);
@@ -105,9 +107,9 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
 	float attenuation = 1.0f / (light.constant + light.linear * Distance + light.quadratic * (Distance * Distance));
 
 	// Combine results
-	vec3 ambient = light.ambient * vec3(texture(material.diffuse, ex_UV));
-	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, ex_UV));
-	vec3 specular = light.specular * spec * vec3(texture(material.specular, ex_UV));
+	vec3 ambient = light.ambient * vec3(texture(diffuse, ex_UV));
+	vec3 diffuse = light.diffuse * diff * vec3(texture(diffuse, ex_UV));
+	vec3 specular = light.specular * spec * vec3(texture(specular, ex_UV));
 
 	ambient *= attenuation;
 	diffuse *= attenuation;
