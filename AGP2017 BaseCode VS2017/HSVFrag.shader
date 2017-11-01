@@ -18,13 +18,13 @@ struct PointLight {
 };
 
 in vec3 FragPos; // VertexPosition
-in vec3 ex_Normal; // WorldNormals <-- Normalized in vertex shader
+in vec3 ex_Normal; 
 in vec2 ex_UV; // ex_TexCoords
 
-layout(location = 0) out vec4 out_color; //The result to be outputted
+layout(location = 0) out vec4 out_color; //The result 
 
 // Put uniforms here:
-uniform vec3 viewPos; // Currently replaced by ex_L
+uniform vec3 viewPos; 
 uniform PointLight pointLight;
 uniform Material material;
 
@@ -49,7 +49,6 @@ void main() {
 	// Properties
 	vec3 normal = normalize(ex_Normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
-	//vec3 viewDir = normalize(-FragPos).xyz;
 
 	// Phase 1: Point lights
 	vec3 result = calcPointLight(pointLight, normal, FragPos, viewDir);
@@ -91,6 +90,7 @@ void main() {
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
 
 	vec3 lightDir = normalize(light.position.xyz - FragPos.xyz); // Normalize the resulting direction vector (ex_L)
+	vec3 ex_V = normalize(-FragPos).xyz;
 
 	// Diffuse
 	float diff = max(dot(normal, lightDir), 0.0); // Use Max to avoid dot product going negative when vector is greater than 90 degrees.
@@ -98,7 +98,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
 	// Specular 
 	// Calculate - Reflect of light
 	vec3 reflectDir = reflect(-lightDir, normal); // R
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+	float spec = pow(max(dot(ex_V, reflectDir), 0.0), material.shininess);
 
 	// Attenuation
 	float Distance = length(light.position - FragPos);

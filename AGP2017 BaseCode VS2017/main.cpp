@@ -696,7 +696,8 @@ void draw(SDL_Window * window) {
 		modelMatrix = glm::mat4(1.0);
 		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
 		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelMatrix", glm::value_ptr(modelMatrix));
-
+		uniformIndex = glGetUniformLocation(HSVShaderProgram, "cameraPos");
+		glUniform3fv(uniformIndex, 1, glm::value_ptr(eye));
 		
 		GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
 		glUniform3f(viewPosLoc, light0.position[0], light0.position[1], light0.position[2]);
