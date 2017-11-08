@@ -74,7 +74,7 @@ void main() {
 	result += emission;
 
 	//phase 3: gamma correct
-	float gammaValue = 2.2;
+	float gammaValue = 1/2.2;
 
 	if (ex_UV.x < 0.5) {
 		result += pow(result, vec3(gammaValue)); 
