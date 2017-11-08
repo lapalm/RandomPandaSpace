@@ -332,8 +332,7 @@ void init(void) {
 	uniformIndex = glGetUniformLocation(reflectrefractShaderProgram, "texture1_skycube");
 	glUniform1i(uniformIndex, 1);
 
-	rt3d::setLight(HSVShaderProgram, light0);
-	rt3d::setMaterial(HSVShaderProgram, material1);
+	HSVShaderProgram = rt3d::initShaders("HSVVert.shader", "HSVFrag.shader");
 	// set light attenuation shader uniforms
 	uniformIndex = glGetUniformLocation(HSVShaderProgram, "attConst");
 	glUniform1f(uniformIndex, attConstant);
@@ -342,10 +341,9 @@ void init(void) {
 	uniformIndex = glGetUniformLocation(HSVShaderProgram, "attQuadratic");
 	glUniform1f(uniformIndex, attQuadratic);
 
-	HSVShaderProgram = rt3d::initShaders("HSVVert.shader", "HSVFrag.shader");
 	textureProgram = rt3d::initShaders("textured.vert", "textured.frag");
 	skyboxProgram = rt3d::initShaders("cubeMap.vert", "cubeMap.frag");
-	HSVShaderProgram = rt3d::initShaders("HSVVert.shader", "HSVFrag.shader");
+	
 
 
 	const char *cubeTexFiles[6] = {
@@ -719,7 +717,6 @@ void draw(SDL_Window * window) {
 		
 		GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
 		glUniform3f(viewPosLoc, eye.x, eye.y, eye.z);
-		//glUniform3f(viewPosLoc, eye.x, eye.y, eye.z);
 
 		// Multi-light - pointLight
 		GLint pointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.position");
