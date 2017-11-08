@@ -376,6 +376,11 @@ void init(void) {
 	groundIndexCount = indices.size();
 	meshObjects[2] = rt3d::createMesh(verts.size() / 3, verts.data(), nullptr, norms.data(), tex_coords.data(), groundIndexCount, indices.data());
 
+	verts.clear(); norms.clear(); tex_coords.clear(); indices.clear();
+	rt3d::loadObj("bunny-5000.obj", verts, norms, tex_coords, indices);
+	toonIndexCount = indices.size();
+	meshObjects[3] = rt3d::createMesh(verts.size() / 3, verts.data(), nullptr, norms.data(), nullptr, toonIndexCount, indices.data());
+
 	// Textures:
 	textures[0] = loadBitmap("concrete.bmp");
 	textures[1] = loadBitmap("hobgoblin2.bmp");
@@ -680,7 +685,21 @@ void draw(SDL_Window * window) {
 		glBindTexture(GL_TEXTURE_2D, 0);	// unbind the texture
 		// remember to use at least one pop operation per push...
 		mvStack.pop(); // initial matrix
-		
+
+
+		glUseProgram(toonShaderProgram);
+		rt3d::setLightPos(toonShaderProgram, glm::value_ptr(tmp));
+		rt3d::setUniformMatrix4fv(toonShaderProgram, "projection", glm::value_ptr(projection));
+		mvStack.push(mvStack.top());
+		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-8.0f, 0.0f, -2.0f));
+		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(10.0f, 10.0f, 10.0f));
+		rt3d::setUniformMatrix4fv(toonShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
+		rt3d::setLight(toonShaderProgram, light0);
+		rt3d::setLightPos(toonShaderProgram, glm::value_ptr(tmp));
+		rt3d::setUniformMatrix3fv(toonShaderProgram, "normalmatrix", glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(mvStack.top())))));
+		rt3d::drawIndexedMesh(meshObjects[3], toonIndexCount, GL_TRIANGLES);
+		mvStack.pop();
+
 
 		// Draw cube using HSV Shader
 		glUseProgram(HSVShaderProgram);
@@ -688,19 +707,18 @@ void draw(SDL_Window * window) {
 		rt3d::setUniformMatrix4fv(HSVShaderProgram, "projection", glm::value_ptr(projection)); // projection
 
 		modelMatrix = glm::mat4(1.0); // model
-		mvStack.push(mvStack.top()); // modelView Matrix
+		mvStack.push(mvStack.top()); // view Matrix
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 2.5f, -1.0f));
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
-		mvStack.top() = mvStack.top() * modelMatrix;
-		modelMatrix = glm::mat4(1.0);
+		mvStack.top() = mvStack.top() * modelMatrix; //Model View
 		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelMatrix", glm::value_ptr(modelMatrix));
+		rt3d::setUniformMatrix4fv(HSVShaderProgram, "modelMatrix", glm::value_ptr(modelMatrix)); 
 		uniformIndex = glGetUniformLocation(HSVShaderProgram, "cameraPos");
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(eye));
 		
 		GLint viewPosLoc = glGetUniformLocation(HSVShaderProgram, "viewPos");
-		glUniform3f(viewPosLoc, light0.position[0], light0.position[1], light0.position[2]);
+		glUniform3f(viewPosLoc, eye.x, eye.y, eye.z);
 		//glUniform3f(viewPosLoc, eye.x, eye.y, eye.z);
 
 		// Multi-light - pointLight
@@ -712,22 +730,13 @@ void draw(SDL_Window * window) {
 		GLint linearPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.linear");
 		GLint quadraticPointLightLoc = glGetUniformLocation(HSVShaderProgram, "pointLight.quadratic");
 
-
-		// Set Light attenuation properties <- See for value reference: http://www.ogre3d.org/tikiwiki/tiki-index.php?page=-Point+Light+Attenuation
-		// These values are for attenuation distance: 50
-		//glUniform1f(lightConstantPos, 1.0f); 
-		//glUniform1f(lightLinearPos, 0.022f);
-		//glUniform1f(lightQuadraticPos, 0.0019f);
-
-
 		// Set Point Light Properties for multi-light
-		glUniform3f(pointLightLoc, light0.position[0], light0.position[1], light0.position[2]);
-		//cout << light0.position[0] << endl;
+		glUniform3f(pointLightLoc, lightPos[0], lightPos[1], lightPos[2]);
 		glUniform3f(ambientPointLightLoc, 0.05f, 0.05f, 0.05f);
 		glUniform3f(diffusePointLightLoc, 0.8f, 0.8f, 0.8f);
 		glUniform3f(specularPointLightLoc, 1.0f, 1.0f, 1.0f);
 		glUniform1f(constantPointLightLoc, 1.0f);
-		glUniform1f(linearPointLightLoc, 0.09f);//0.09f);
+		glUniform1f(linearPointLightLoc, 0.09f);
 		glUniform1f(quadraticPointLightLoc, 0.032);
 
 		// Set Material Properties
@@ -776,11 +785,10 @@ void draw(SDL_Window * window) {
 
 		rt3d::drawIndexedMesh(meshObjects[0], meshIndexCount, GL_TRIANGLES);
 
-
 		glBindTexture(GL_TEXTURE_2D, 0);	// unbind the texture
 
 		// remember to use at least one pop operation per push...
-		mvStack.pop(); // initial matrix
+		mvStack.pop(); 
 
 		mvStack.pop();
 

@@ -53,6 +53,7 @@ void main() {
 	// Phase 1: Point lights
 	vec3 result = calcPointLight(pointLight, normal, FragPos, viewDir);
 
+
 	// phase 2: emission + hsv
 
 	// sample the image
@@ -76,7 +77,7 @@ void main() {
 	float gammaValue = 2.2;
 
 	if (ex_UV.x < 0.5) {
-		result += pow(result, vec3(1/ gammaValue)); 
+		result += pow(result, vec3(gammaValue)); 
 	}
 
 	//phase 4: Output Result
@@ -90,7 +91,6 @@ void main() {
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
 
 	vec3 lightDir = normalize(light.position.xyz - FragPos.xyz); // Normalize the resulting direction vector (ex_L)
-	vec3 ex_V = normalize(-FragPos).xyz;
 
 	// Diffuse
 	float diff = max(dot(normal, lightDir), 0.0); // Use Max to avoid dot product going negative when vector is greater than 90 degrees.
@@ -98,11 +98,11 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
 	// Specular 
 	// Calculate - Reflect of light
 	vec3 reflectDir = reflect(-lightDir, normal); // R
-	float spec = pow(max(dot(ex_V, reflectDir), 0.0), material.shininess);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+	spec = max(dot(viewDir, reflectDir), 0.0);
 
 	// Attenuation
 	float Distance = length(light.position - FragPos);
-	//float Distance = distance(FragPos, light.position);
 
 	float attenuation = 1.0f / (light.constant + light.linear * Distance + light.quadratic * (Distance * Distance));
 
@@ -110,6 +110,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir) {
 	vec3 ambient = light.ambient * vec3(texture(diffuse, ex_UV));
 	vec3 diffuse = light.diffuse * diff * vec3(texture(diffuse, ex_UV));
 	vec3 specular = light.specular * spec * vec3(texture(specular, ex_UV));
+
 
 	ambient *= attenuation;
 	diffuse *= attenuation;
