@@ -154,7 +154,7 @@ GLuint textToTexture(const char * str, GLuint textID/*, TTF_Font *font, SDL_Colo
 	} //Do this only when you initialise the texture to avoid memory leakage
 
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, stringImage->w, stringImage->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, stringImage->pixels);
+	
 	glBindTexture(GL_TEXTURE_2D, NULL);
 
 	SDL_FreeSurface(stringImage);
@@ -214,7 +214,7 @@ GLuint loadBitmap(char *fname) {
 
 	GLuint externalFormat, internalFormat;
 	if (format->Amask) {
-		internalFormat = GL_SRGB_ALPHA;
+		internalFormat = GL_RGBA;
 		externalFormat = (format->Rmask < format->Bmask) ? GL_RGBA : GL_BGRA;
 	}
 	else {
@@ -265,7 +265,7 @@ GLuint loadCubeMap(const char *fname[6], GLuint *texID)
 		SDL_PixelFormat *format = tmpSurface->format;
 		externalFormat = (format->Rmask < format->Bmask) ? GL_RGBA : GL_BGR;
 
-		glTexImage2D(sides[i], 0, GL_SRGB_ALPHA, tmpSurface->w, tmpSurface->h, 0, externalFormat, GL_UNSIGNED_BYTE, tmpSurface->pixels);
+		glTexImage2D(sides[i], 0, GL_RGBA, tmpSurface->w, tmpSurface->h, 0, externalFormat, GL_UNSIGNED_BYTE, tmpSurface->pixels);
 		// texture loaded, free the temporary buffer
 		SDL_FreeSurface(tmpSurface);
 	}
@@ -400,7 +400,7 @@ void init(void) {
 	// otherwise mipmaps are assumed
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, reflectionWidth, reflectionHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, reflectionWidth, reflectionHeight, 0, GL_RGBA, GL_FLOAT, NULL);
 
 	// random comment test
 
@@ -473,19 +473,6 @@ void update(void) {
 		glEnable(GL_CULL_FACE);
 	}
 
-	/*
-	GL_FRAMEBUFFER_SRGB:
-	Tell OpenGL that each subsequent drawing commands should first gamma correct colors from the sRGB color space before storing them in color buffer(s).
-	sRGB is the color space, which roughly corresponds to a gamma of 2,2 and a standard for most home devices.
-	*/
-
-	if (keys[SDL_SCANCODE_3]) {
-		glEnable(GL_FRAMEBUFFER_SRGB); 
-	}
-
-	if (keys[SDL_SCANCODE_4]) {
-		glDisable(GL_FRAMEBUFFER_SRGB);
-	}
 
 	if (keys[SDL_SCANCODE_Z]) {
 		if (--currentAnim < 0) currentAnim = 19;
